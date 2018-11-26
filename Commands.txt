@@ -1,7 +1,3 @@
-Gui:
-sudo apt-get install git
-sudo apt-get update
-git clone https://github.com/j-navesx/trbpm_final.git
 Adicionar ficheiros ao github:
   git add <ficheiro>
 Adicionar changes:
