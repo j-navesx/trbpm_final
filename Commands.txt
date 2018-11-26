@@ -5,3 +5,4 @@ Adicionar changes:
 Adicionar ao repositório:
   git commit -m <descrição do q adicionaste desta forma só para ajudar ([o que alteraste] [data tipo : 26-11] [horas])
   git push -u origin master
+  lol
