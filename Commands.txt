@@ -4,5 +4,8 @@ sudo apt-get update
 git clone https://github.com/j-navesx/trbpm_final.git
 Adicionar ficheiros ao github:
   git add <ficheiro>
+Adicionar changes:
+  git stage <ficheiro>
 Adicionar ao repositório:
   git commit -m <descrição do q adicionaste desta forma só para ajudar ([o que alteraste] [data tipo : 26-11] [horas])
+  git push -u origin master
