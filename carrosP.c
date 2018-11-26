@@ -3,7 +3,7 @@
 #include <strings.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-void lertxt(){
+void lertxt(qnt[6]){
   struct stock {
     int id;
     int amount;
@@ -45,5 +45,6 @@ void lertxt(){
 } 
 
 void main(){
-  lertxt();
+  int qnt[6];
+  lertxt(qnt[6]);
 }
