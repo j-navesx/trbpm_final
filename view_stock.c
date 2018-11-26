@@ -26,7 +26,20 @@ struct plastico.id= 4;
 struct borracha.id= 5;
 struct aco.id= 6;
 
-char text[20]
+void main(){
+  char text[20];
+  FILE *fp;
+  fp = fopen("files/stock.txt","r");
+  if (fp!=NULL){  
+    while(fgets(text,20,fp)){
+      a = text[0];
+      switch (a){
+        case 1: countF++;
+      }
+      printf("%s",text);
+    }
+    fclose(fp);
+  }
 
 
 /*struct stock.price ferro= 1.40;
@@ -37,4 +50,5 @@ struct stock.price borracha= 1.50;
 struct stock.price aco= 3.30;*/
 
 }
+
 
