@@ -5,7 +5,8 @@
 #include <sys/stat.h>
 void text(){
   printf("\n\t\t**Factory Admin Menu**\n\n");
-  printf("1- Show stock\n");
+  printf("\b1");
+  printf("
   printf("2- Refill stock\n");
   printf("3- Build car\n");
   printf("4- Factory State\n");
