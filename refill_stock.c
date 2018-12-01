@@ -1,9 +1,9 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
 struct stock {
     
     int id;
@@ -64,53 +64,43 @@ void lertxt(struct stock* ptr[6]){
   ptr[5]= &aco;
 }
 
-void txt(struct stock* ptr[6]){
+void refill_stock(struct stock* ptr[6]) {
+    char a;
+    int refillcountAc= 0, refillcountAl= 0, refillcountB= 0, refillcountF= 0, refillcountP= 0, refillcountV= 0;
+    char text[20];
 
-    int i,j;
-    
-    FILE *f;
-    f= fopen("files/stock.txt", "r+");
-    for(i= 0; i < 6; i++) {
-        for(j= 0; j < (*ptr[i]).amount; j++) {
-            fprintf(f,"%d %s %.2f \n",(*ptr[i]).id, (*ptr[i]).name,(*ptr[i]).cost);
-        }
+    FILE *fp;
+  fp = fopen("files/stock.txt","r");
+  if (fp!=NULL){  
+    while(fgets(text,20,fp)){
+      a = text[0];
+      switch (a){
+        case '1': refillcountF++;break;
+        case '2': refillcountAl++;break;
+        case '3': refillcountV++;break;
+        case '4': refillcountP++;break;
+        case '5': refillcountB++;break;
+        case '6': refillcountAc++;break;
+      }
     }
-    fclose(f);
+    fclose(fp);
+  }
+    (*ptr[0]).amount += refillcountF;
+    (*ptr[1]).amount += refillcountAl;
+    (*ptr[2]).amount += refillcountV;
+    (*ptr[3]).amount += refillcountP;
+    (*ptr[4]).amount += refillcountB;
+    (*ptr[5]).amount += refillcountAc;
+
+    for(int i=0; i < 6; i++) {
+        printf("%d\n", (*ptr[i]).amount);
+    }
 }
 
-void view_stock(struct stock* ptr[6],float ct) {
-
-  printf("***********STOCK************\n\n");
-  printf("ID   Type       Price    Qt.\n\n");
-  
-  printf("%d    %s      %.2f     %d\n",(*ptr[0]).id,(*ptr[0]).name,(*ptr[0]).cost,(*ptr[0]).amount);
-  printf("%d    %s   %.2f     %d\n",(*ptr[1]).id,(*ptr[1]).name,(*ptr[1]).cost,(*ptr[1]).amount);
-  printf("%d    %s      %.2f    %d\n",(*ptr[2]).id,(*ptr[2]).name,(*ptr[2]).cost,(*ptr[2]).amount);
-  printf("%d    %s   %.2f     %d\n",(*ptr[3]).id,(*ptr[3]).name,(*ptr[3]).cost,(*ptr[3]).amount);
-  printf("%d    %s   %.2f     %d\n",(*ptr[4]).id,(*ptr[4]).name,(*ptr[4]).cost,(*ptr[4]).amount);
-  printf("%d    %s        %.2f     %d\n",(*ptr[5]).id,(*ptr[5]).name,(*ptr[5]).cost,(*ptr[5]).amount);
-  
-  printf("\n");
-  printf("Total cost: %.2f€\n",ct);
-} 
 
 void main() {
     struct stock* ptr[6];
-    char UserChoice;
-    int i;
-    float custo_total= 0;
 
     lertxt(ptr);
-
-    for(i= 0; i < 6; i++)
-      custo_total += ((*ptr[i]).cost)*((*ptr[i]).amount);
-
-    view_stock(ptr, custo_total);
-    
-    printf("quer modificar txt (s/n)?\n");
-    scanf("%c",&UserChoice);
-    if(UserChoice== 's') {
-    txt(ptr);
-    }
-    
+    refill_stock(ptr);
 }
