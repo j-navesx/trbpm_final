@@ -274,6 +274,7 @@ void main() {
       case '6': break;
     } 
   } while(user != 'E' && user != 'e');
+  printf("Exiting...\n");
 
   /*printf("quer modificar txt (s/n)?\n");
   scanf("%c",&UserChoice);
