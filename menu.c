@@ -45,6 +45,17 @@ void factory_state_display() {
   
 }
 
+void stats_display() {
+
+  printf("        ***Factory Stats Menu***         \n\n");
+  printf("  1 - Finished products by type\n");
+  printf("  2 - Products state\n");
+  printf("  3 - Stations cost\n\n");
+  printf("  B - Back\n\n");
+  printf("Opção: ");
+  
+}
+
 void menu_display() {
 
   printf("\n\t\t***Factory Admin Menu***\n\n");
@@ -136,7 +147,7 @@ void refill_stock(struct stock* stock_ptr[6]) {
     char UserFile[200];
 
     printf("Filename: ");
-    scanf("%s", UserFile);
+    scanf(" %s", UserFile);
     strcat(File, UserFile);
     printf("\n");
 
@@ -171,7 +182,7 @@ void build_car_interface() {
 
   do {
     build_car_display();
-    scanf("%c", &user);
+    scanf(" %c", &user);
 
     switch(user) {
       case '1': break;
@@ -189,7 +200,7 @@ void factory_state_interface() {
 
   do {
     factory_state_display();
-    scanf("%c", &user);
+    scanf(" %c", &user);
 
     switch(user) {
       case '1': break;
@@ -198,6 +209,22 @@ void factory_state_interface() {
       case '4': break;
       case '5': break;
       case '6': break;
+    }
+  }while(user != 'B' && user != 'b');
+}
+
+void stats_interface() {
+
+  char user;
+
+  do {
+    stats_display();
+    scanf(" %c", &user);
+
+    switch(user) {
+      case '1': break;
+      case '2': break;
+      case '3': break;
     }
   }while(user != 'B' && user != 'b');
 }
@@ -242,7 +269,7 @@ void main() {
                 break;
       case '4': factory_state_interface();
                 break;
-      case '5': 
+      case '5': stats_interface();
                 break;
       case '6': break;
     } 
