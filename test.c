@@ -4,22 +4,34 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-void main(){
-    char c;
-    char name[20];
-    int i= 0;
+typedef struct stations {
+    int id;
+    char ops[3];
+    int temp_ops[3];
+    double cost;
+    int temp_final;
+}stations;
+
+void main() {
+    stations station[5];
 
     FILE *fp;
-    fp= fopen("files/processing.txt","r");
+    fp= fopen("files/stations.dat","rb");
     if(fp!=NULL) {
-        while((c=getc(fp))!= EOF) {
-            if(c == ' ') {
-                break;
-            }
-            name[i]= c;
-            i++;
+        fread(station,sizeof(stations),5,fp);
+        for(int j= 0; j < 5; j++) {
+              printf("%d ", station[j].id);
+          for(int i= 0; i < 3; i++) {
+              printf("%c ", station[j].ops[i]);
+          }
+          for(int i= 0; i<3; i++) {
+              printf("%d ", station[j].temp_ops[i]);
+          }
+          printf("%.2f ", station[j].cost);
+          printf("%d ", station[j].temp_final);
+          printf("\n");     
         }
-        printf("%s", name);
-        fclose(fp);
     }
+    fclose(fp);
 }
+        

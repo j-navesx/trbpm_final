@@ -18,8 +18,17 @@ struct stock {
    borracha= {5,-1,1.50,"Borracha"},
    aco= {6,-1,3.30,"Aço"};
 
+   typedef struct stations {
+    int id;
+    char ops[3];
+    int temp_ops[3];
+    double cost;
+    int temp_final;
+}stations;
+
 void build_car_display() {
 
+//display da opção 3 (display car)
   printf("        ***Product List Menu***         \n\n");
   printf("  1 - Ford\n");
   printf("  2 - Renault\n");
@@ -33,6 +42,7 @@ void build_car_display() {
 
 void factory_state_display() {
 
+//display da opção 4 (factory state)
   printf("        ***Factory State Menu***         \n\n");
   printf("  1 - Show all processes\n");
   printf("  2 - Show processes by type\n");
@@ -47,6 +57,7 @@ void factory_state_display() {
 
 void stats_display() {
 
+//display da opção 5 (stats)
   printf("        ***Factory Stats Menu***         \n\n");
   printf("  1 - Finished products by type\n");
   printf("  2 - Products state\n");
@@ -58,6 +69,7 @@ void stats_display() {
 
 void menu_display() {
 
+//display do menu principal
   printf("\n\t\t***Factory Admin Menu***\n\n");
   printf("1- Show stock\n");
   printf("2- Refill stock\n");
@@ -74,7 +86,9 @@ void lertxt(struct stock* stock_ptr[6]) {
   int countF= 0, countAl= 0, countV= 0, countP= 0, countB= 0, countAc= 0;
   char text[20];
   char a;
-
+  
+  //Leitura do stock.txt de modo a ver a quantidade inicial
+  //ps: para atualizar existe no final um codigo que coloca todas as informações da estrutura para o stock.txt
   FILE *fp;
   fp = fopen("files/stock.txt","r");
   if (fp!=NULL){  
@@ -92,6 +106,7 @@ void lertxt(struct stock* stock_ptr[6]) {
     fclose(fp);
   }
 
+  //define o tamanho de cada elemento do vetor de pointers
   stock_ptr[0]= malloc(sizeof(ferro));
   stock_ptr[1]= malloc(sizeof(aluminio));
   stock_ptr[2]= malloc(sizeof(vidro));
@@ -99,6 +114,7 @@ void lertxt(struct stock* stock_ptr[6]) {
   stock_ptr[4]= malloc(sizeof(borracha));
   stock_ptr[5]= malloc(sizeof(aco));
 
+  //define a quantidade de cada material na structure
   ferro.amount= countF;
   aluminio.amount= countAl;
   vidro.amount= countV;
@@ -106,6 +122,7 @@ void lertxt(struct stock* stock_ptr[6]) {
   borracha.amount= countB;
   aco.amount= countAc;
 
+  //aponta o stock_ptr pela ordem ao seu correspondente material
   stock_ptr[0]= &ferro;
   stock_ptr[1]= &aluminio;
   stock_ptr[2]= &vidro;
@@ -117,9 +134,10 @@ void lertxt(struct stock* stock_ptr[6]) {
 void view_stock(struct stock* stock_ptr[6],float ct) {
 
   char user;
-  
+  //Esta confusão é o printf da interface do view stock que vai buscar a informação à estrutura.
   do {
   
+  //menu stock
     printf("        ***STOCK***         \n\n");
     printf("ID   Type       Price    Qt.\n\n");
   
@@ -140,40 +158,16 @@ void view_stock(struct stock* stock_ptr[6],float ct) {
 } 
 
 void refill_stock(struct stock* stock_ptr[6]) {
-    char a;
-    int refillcountAc= 0, refillcountAl= 0, refillcountB= 0, refillcountF= 0, refillcountP= 0, refillcountV= 0;
-    char text[20];
-    char File[200]= {"files/"};
-    char UserFile[200];
-
-    printf("Filename: ");
-    scanf(" %s", UserFile);
-    strcat(File, UserFile);
-    printf("\n");
-
-    FILE *refill;
-    refill = fopen(File,"r");
-    if (refill!=NULL){  
-      while(fgets(text,20,refill)){
-        a = text[0];
-        switch (a){
-          case '1': refillcountF++;break;
-          case '2': refillcountAl++;break;
-          case '3': refillcountV++;break;
-          case '4': refillcountP++;break;
-          case '5': refillcountB++;break;
-          case '6': refillcountAc++;break;
-        }
-      }
-    fclose(refill);
-    }
-    (*stock_ptr[0]).amount += refillcountF;
-    (*stock_ptr[1]).amount += refillcountAl;
-    (*stock_ptr[2]).amount += refillcountV;
-    (*stock_ptr[3]).amount += refillcountP;
-    (*stock_ptr[4]).amount += refillcountB;
-    (*stock_ptr[5]).amount += refillcountAc;
-
+    int user_id;
+    int user_qnt;
+    //pede ao user o id do material e a quantidade do dito.
+    printf("Escolha um id (1- ferro,2- aluminio,3- vidro,4- plastico,5- borracha,6- aço:\n ");
+    scanf("%d", &user_id);
+    printf("%s selected\n",(*stock_ptr[user_id-1]).name);
+    printf("Quanto deseja adicionar?\n");
+    scanf("%d", &user_qnt);
+    //Adicionar a quantidade de um material à estrutura que o user escolher.
+    stock_ptr[user_id-1]->amount += user_qnt;
 }
 
 void build_car_interface() {
@@ -184,6 +178,7 @@ void build_car_interface() {
     build_car_display();
     scanf(" %c", &user);
 
+    //dá a hipotese do user ir utilizar cada opção do menu que diz build car (opção 3)
     switch(user) {
       case '1': break;
       case '2': break;
@@ -202,6 +197,7 @@ void factory_state_interface() {
     factory_state_display();
     scanf(" %c", &user);
 
+//dá a hipotese do user ir utilizar cada opção do menu que diz factory state (opção 4)
     switch(user) {
       case '1': break;
       case '2': break;
@@ -221,12 +217,23 @@ void stats_interface() {
     stats_display();
     scanf(" %c", &user);
 
+//dá a hipotese do user ir utilizar cada opção do menu que diz stats (opção 5)
     switch(user) {
       case '1': break;
       case '2': break;
       case '3': break;
     }
   }while(user != 'B' && user != 'b');
+}
+
+void ler_stations(stations station[5]) {
+
+    FILE *fp;
+    fp= fopen("files/stations.dat","rb");
+    if(fp!=NULL) {
+        fread(station,sizeof(stations),5,fp);    
+    }
+    fclose(fp);
 }
 
 /*void txt(struct stock* ptr[6]) {
@@ -247,11 +254,13 @@ void main() {
 
   char user;
   struct stock* stock_ptr[6];
+  stations station[5];
   char UserChoice;
   int i;
   float custo_total= 0;
   
   lertxt(stock_ptr);
+  ler_stations(station);
 
   do {
     menu_display();
