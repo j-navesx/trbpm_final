@@ -214,7 +214,7 @@ void carP(car *processing[sizeof(car)],int queue, char *stationsv){
   }
   fclose(cp);
   printf("Sua opção: ");
-  scanf("%d", &choice);
+  scanf("%1d", &choice);
   cp = fopen("files/carmodel.txt","r");
   if(cp!=NULL){
   for(int i=0;i<choice;i++){
