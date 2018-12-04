@@ -27,7 +27,7 @@ struct stock {
 }stations;
 
 void build_car_display() {
-
+system("clear");
 //display da opção 3 (display car)
   printf("        ***Product List Menu***         \n\n");
   printf("  1 - Ford\n");
@@ -41,7 +41,7 @@ void build_car_display() {
 }
 
 void factory_state_display() {
-
+system("clear");
 //display da opção 4 (factory state)
   printf("        ***Factory State Menu***         \n\n");
   printf("  1 - Show all processes\n");
@@ -56,7 +56,7 @@ void factory_state_display() {
 }
 
 void stats_display() {
-
+system("clear");
 //display da opção 5 (stats)
   printf("        ***Factory Stats Menu***         \n\n");
   printf("  1 - Finished products by type\n");
@@ -68,7 +68,7 @@ void stats_display() {
 }
 
 void menu_display() {
-
+system("clear");
 //display do menu principal
   printf("\n\t\t***Factory Admin Menu***\n\n");
   printf("1- Show stock\n");
@@ -136,7 +136,7 @@ void view_stock(struct stock* stock_ptr[6],float ct) {
   char user;
   //Esta confusão é o printf da interface do view stock que vai buscar a informação à estrutura.
   do {
-  
+  system("clear");
   //menu stock
     printf("        ***STOCK***         \n\n");
     printf("ID   Type       Price    Qt.\n\n");
@@ -158,7 +158,42 @@ void view_stock(struct stock* stock_ptr[6],float ct) {
 } 
 
 void refill_stock(struct stock* stock_ptr[6]) {
-    int user_id;
+
+  char a;
+  int refillcountAc= 0, refillcountAl= 0, refillcountB= 0, refillcountF= 0, refillcountP= 0, refillcountV= 0;
+  char text[20];
+  char userFile[20];
+  char aux[20]= "files/";
+
+  printf("Filename: ");
+  scanf(" %s", userFile);
+  strcat(aux,userFile);
+
+  FILE *fp;
+  fp = fopen(aux,"r");
+  if (fp!=NULL){  
+    while(fgets(text,20,fp)){
+      a = text[0];
+      switch (a){
+        case '1': refillcountF++;break;
+        case '2': refillcountAl++;break;
+        case '3': refillcountV++;break;
+        case '4': refillcountP++;break;
+        case '5': refillcountB++;break;
+        case '6': refillcountAc++;break;
+      }
+    }
+    fclose(fp);
+  }
+    (*stock_ptr[0]).amount += refillcountF;
+    (*stock_ptr[1]).amount += refillcountAl;
+    (*stock_ptr[2]).amount += refillcountV;
+    (*stock_ptr[3]).amount += refillcountP;
+    (*stock_ptr[4]).amount += refillcountB;
+    (*stock_ptr[5]).amount += refillcountAc;
+
+    
+    /*int user_id;
     int user_qnt;
     //pede ao user o id do material e a quantidade do dito.
     printf("Escolha um id (1- ferro,2- aluminio,3- vidro,4- plastico,5- borracha,6- aço:\n ");
@@ -167,7 +202,7 @@ void refill_stock(struct stock* stock_ptr[6]) {
     printf("Quanto deseja adicionar?\n");
     scanf("%d", &user_qnt);
     //Adicionar a quantidade de um material à estrutura que o user escolher.
-    stock_ptr[user_id-1]->amount += user_qnt;
+    stock_ptr[user_id-1]->amount += user_qnt;*/
 }
 
 void build_car_interface() {
@@ -255,7 +290,6 @@ void main() {
   char user;
   struct stock* stock_ptr[6];
   stations station[5];
-  char UserChoice;
   int i;
   float custo_total= 0;
   
