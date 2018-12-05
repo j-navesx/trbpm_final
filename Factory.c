@@ -3,20 +3,20 @@
 #include <string.h>
 #include <sys/types.h>
 
-struct stock 
+typedef struct stock 
 { 
   int id;
   int amount;
   float cost;
   char name[20];
-}
+}stock;
 //! Passar esta parte para ler do items.txt
- ferro= {1,-1,1.40,"Ferro"},
+ /*ferro= {1,-1,1.40,"Ferro"},
  aluminio= {2,-1,7.80,"Aluminio"},
  vidro= {3,-1,12.50,"Vidro"},
  plastico= {4,-1,2.20,"Plástico"},
  borracha= {5,-1,1.50,"Borracha"},
- aco= {6,-1,3.30,"Aço"};
+ aco= {6,-1,3.30,"Aço"};*/
 
 typedef struct stations 
 {
@@ -57,16 +57,71 @@ typedef struct car
   }fabproc;
 }car;
 
-void lertxt(struct stock* stock_ptr[6]) {
-  int countF= 0, countAl= 0, countV= 0, countP= 0, countB= 0, countAc= 0;
-  char text[20];
+void lertxt(stock *stock_ptr[sizeof(stock)],int *countstock) {
+  //int countF= 0, countAl= 0, countV= 0, countP= 0, countB= 0, countAc= 0;
+  stock_ptr[*countstock] = malloc(sizeof(stock));
+  int id;
+  char name[20];
+  float cost;
   char a;
+  int noitem = 0;
+  stock_ptr[*countstock]->amount = 1;
   //Leitura do stock.txt de modo a ver a quantidade inicial
   //ps: para atualizar existe no final um codigo que coloca todas as informações da estrutura para o stock.txt
   FILE *fp;
   fp = fopen("files/stock.txt","r");
   if (fp!=NULL){  
-    while(fgets(text,20,fp)){
+    do{
+      fscanf(fp, "%d %s %f", &id, name, &cost);
+      printf("scanf\n\n");
+      if (*countstock == 0){
+        stock_ptr[*countstock] -> id = id;
+        strcpy(stock_ptr[*countstock] -> name, name);
+        stock_ptr[*countstock] -> cost = cost;
+        stock_ptr[*countstock+1] = malloc(sizeof(stock));
+        *countstock++; 
+        printf("Primeiro item\n\n");
+      }
+      else{
+        printf("Else\n\n");
+        for(int i = 0; i<*countstock; i++){
+          printf("begin for\n\n");
+          printf("i: %d",i);
+          printf("stock_ptr compared %d\n",stock_ptr[i]->id);
+          printf("id compared %d\n",id);
+          if(stock_ptr[i]->id == id){
+            noitem=0;
+            stock_ptr[i]->amount += 1;
+            printf("Added\n");
+            break;
+          }
+          else{noitem=1;}
+        }
+        printf("End of for \n\n");
+      }
+        if(noitem==1){
+          printf("olá1\n");
+          printf("countstock before  %d",*countstock);
+          printf("countstock after    %d",*countstock);
+          printf("olá2\n\n");
+          stock_ptr[*countstock] -> amount = 1;
+          printf("amount\n");
+          stock_ptr[*countstock] -> id = id;
+          printf("stock_ptr2   %d\n\n",stock_ptr[2]->id);
+          printf("id\n");
+          printf("stock lido:%d     stock_ptr:%d\n\n\n",id,stock_ptr[*countstock]->id);
+          strcpy(stock_ptr[*countstock] -> name, name);
+          printf("nome\n");
+          stock_ptr[*countstock] -> cost = cost;
+          printf("cost\n");
+          noitem = 0;
+          stock_ptr[*countstock+1] = malloc(sizeof(stock));
+          *countstock++;
+        }
+        printf("%d countstock\n\n",*countstock);
+        printf("End of loop\n\n\n");
+    }while((a=fgetc(fp))!=EOF);
+    /*while(fgets(text,20,fp)){
       a = text[0];
       switch (a){
         case '1': countF++;break;
@@ -76,11 +131,11 @@ void lertxt(struct stock* stock_ptr[6]) {
         case '5': countB++;break;
         case '6': countAc++;break;
       }
-    }
+    }*/
     fclose(fp);
   }
   //define o tamanho de cada elemento do vetor de pointers
-  stock_ptr[0]= malloc(sizeof(ferro));
+ /* stock_ptr[0]= malloc(sizeof(ferro));
   stock_ptr[1]= malloc(sizeof(aluminio));
   stock_ptr[2]= malloc(sizeof(vidro));
   stock_ptr[3]= malloc(sizeof(plastico));
@@ -100,6 +155,7 @@ void lertxt(struct stock* stock_ptr[6]) {
   stock_ptr[3]= &plastico;
   stock_ptr[4]= &borracha;
   stock_ptr[5]= &aco;
+  */
 }
 
 // Read Files Function -> Stores in strings
@@ -158,7 +214,7 @@ void r_files(car *processing[sizeof(car)],int queue, char *stationsv){
   
 }
 
-void view_stock(struct stock* stock_ptr[6],float ct) {
+void view_stock(stock *stock_ptr[sizeof(stock)],float ct, int *countstock) {
   system("clear");
   char user;
   //Esta confusão é o printf da interface do view stock que vai buscar a informação à estrutura.
@@ -166,12 +222,9 @@ void view_stock(struct stock* stock_ptr[6],float ct) {
   //menu stock
     printf("        ***STOCK***         \n\n");
     printf("ID   Type       Price    Qt.\n\n");
-    printf("%d    %s      %.2f     %d\n",(*stock_ptr[0]).id,(*stock_ptr[0]).name,(*stock_ptr[0]).cost,(*stock_ptr[0]).amount);
-    printf("%d    %s   %.2f     %d\n",(*stock_ptr[1]).id,(*stock_ptr[1]).name,(*stock_ptr[1]).cost,(*stock_ptr[1]).amount);
-    printf("%d    %s      %.2f    %d\n",(*stock_ptr[2]).id,(*stock_ptr[2]).name,(*stock_ptr[2]).cost,(*stock_ptr[2]).amount);
-    printf("%d    %s   %.2f     %d\n",(*stock_ptr[3]).id,(*stock_ptr[3]).name,(*stock_ptr[3]).cost,(*stock_ptr[3]).amount);
-    printf("%d    %s   %.2f     %d\n",(*stock_ptr[4]).id,(*stock_ptr[4]).name,(*stock_ptr[4]).cost,(*stock_ptr[4]).amount);
-    printf("%d    %s        %.2f     %d\n",(*stock_ptr[5]).id,(*stock_ptr[5]).name,(*stock_ptr[5]).cost,(*stock_ptr[5]).amount);
+    for(int i = 0; i< *countstock; i++){
+      printf("%d   %s        %.2f  %d", stock_ptr[i]->id, stock_ptr[i]->name, stock_ptr[i]->cost, stock_ptr[i]->amount);
+    }
     printf("\n");
     printf("Total cost: %.2f€\n\n",ct);
     getchar();
@@ -179,7 +232,7 @@ void view_stock(struct stock* stock_ptr[6],float ct) {
   } while(user != '\n');
 }
 
-void refill_stock(struct stock* stock_ptr[6]) {
+void refill_stock(stock *stock_ptr[sizeof(stock)]) {
     system("clear");
     int user_id;
     int user_qnt;
@@ -214,7 +267,7 @@ void carP(car *processing[sizeof(car)],int queue, char *stationsv){
   }
   fclose(cp);
   printf("Sua opção: ");
-  scanf("%1d", &choice);
+  scanf("%d", &choice);
   cp = fopen("files/carmodel.txt","r");
   if(cp!=NULL){
   for(int i=0;i<choice;i++){
@@ -306,7 +359,7 @@ void factory_state_interface() {
   char user;
   do {
     factory_state_display();
-    scanf(" %c", &user);
+    scanf(" %s", &user);
 //dá a hipotese do user ir utilizar cada opção do menu que diz factory state (opção 4)
     switch(user) {
       case '1': break;
@@ -315,6 +368,9 @@ void factory_state_interface() {
       case '4': break;
       case '5': break;
       case '6': break;
+      default: system("clear");
+               continue;
+
     }
   }while(user != 'B' && user != 'b');
 }
@@ -322,61 +378,50 @@ void factory_state_interface() {
 void stats_interface() {
   system("clear");
   char user;
-  do {
-    stats_display();
-    scanf(" %c", &user);
+    
+      do {
+        stats_display();
+        scanf(" %c", &user);
 //dá a hipotese do user ir utilizar cada opção do menu que diz stats (opção 5)
-    switch(user) {
-      case '1': break;
-      case '2': break;
-      case '3': break;
+      switch(user) {
+        case '1': break;
+        case '2': break;
+        case '3': break;
+        default:system("clear"); 
+                continue;
     }
   }while(user != 'B' && user != 'b');
 }
-
-
-void build_car_interface() {
-  system("clear");
-  char user;
-  do {
-    build_car_display();
-    scanf(" %c", &user);
-    //dá a hipotese do user ir utilizar cada opção do menu que diz build car (opção 3)
-    switch(user) {
-      case '1': break;
-      case '2': break;
-      case '3': break;
-      case '4': break;
-      case '5': break;
-    }
-  }while(user != 'B' && user != 'b');
-}
-
 
 void main(){
-  system("clear");
   int queue=0;
-  char user;
+  char *user = calloc(1000, sizeof(char));
   char *stationsv= calloc(1000, sizeof(char));
   stations station[5];
   car *processing[sizeof(car)];
   float custo_total= 0;
-  struct stock* stock[6];
-  lertxt(stock);
+  stock *stock_ptr[sizeof(stock)];
+  int stockcount = 0;
+  int *countstock;
+  countstock = &stockcount;
+  lertxt(stock_ptr,countstock);
   r_files(processing,queue,stationsv);
   ler_stations(station);
   do {
+    system("clear");
     menu_display();
-    scanf(" %c", &user);
+    //Allow the option to be only one character long
+    scanf(" %s", user);
+    if(strlen(user)>1){continue;}
     printf("\n");
-    switch(user) {
+    switch(*user) {
       case '1': custo_total= 0;
-                for(int i= 0; i < 6; i++)
-                   custo_total += ((*stock[i]).cost)*((*stock[i]).amount);
-                view_stock(stock, custo_total);
+                for(int i= 0; i < *countstock; i++)
+                   custo_total += ((*stock_ptr[i]).cost)*((*stock_ptr[i]).amount);
+                view_stock(stock_ptr, custo_total,countstock);
                 system("clear");
                 break;
-      case '2': refill_stock(stock);
+      case '2': refill_stock(stock_ptr);
                 system("clear");
                 break;
       case '3': carP(processing,queue,stationsv);
@@ -389,7 +434,8 @@ void main(){
                 system("clear");
                 break;
       case '6': break;
+      default: continue;
     } 
-  } while(user != 'E' && user != 'e');
+  } while(strchr(user,'E')== 0 && strchr(user,'e')==0);
   printf("Exiting...\n");
 }
