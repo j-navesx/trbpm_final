@@ -1,6 +1,0 @@
-1 -1 1.40 Ferro
-2 -1 7.80 Aluminio
-3 -1 12.50 Vidro
-4 -1 2.50 Plástico
-5 -1 1.50 Borracha
-6 -1 3.30 Aço

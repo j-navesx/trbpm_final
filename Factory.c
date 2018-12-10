@@ -10,13 +10,6 @@ typedef struct stock
   float cost;
   char name[20];
 }stock;
-//! Passar esta parte para ler do items.txt
- /*ferro= {1,-1,1.40,"Ferro"},
- aluminio= {2,-1,7.80,"Aluminio"},
- vidro= {3,-1,12.50,"Vidro"},
- plastico= {4,-1,2.20,"Plástico"},
- borracha= {5,-1,1.50,"Borracha"},
- aco= {6,-1,3.30,"Aço"};*/
 
 typedef struct stations 
 {
@@ -33,16 +26,18 @@ struct stations_use
   int used;
 } st1 = {-1},st2 = {-1}, st3 = {-1}, st4 = {-1}, st5 = {-1};
 
+typedef struct item
+{
+  int id;
+  int amount;
+}item;
+
 //Cars
 typedef struct car
 {
   int id;
   char name[10];
-  struct item
-  {
-    int id;
-    int amount;
-  }item;
+  struct item *itemcar;
   int std;
   struct fab_proc
   {
@@ -53,9 +48,7 @@ typedef struct car
   }fabproc;
 }car;
 
-void lertxt(stock *stock_ptr[sizeof(stock)],int *countstock, struct item *item[sizeof(struct item)]) {
-  //int countF= 0, countAl= 0, countV= 0, countP= 0, countB= 0, countAc= 0;
-  
+void lertxt(stock *stock_ptr[sizeof(stock)],int *countstock) {
   *countstock = 0;
   stock_ptr[*countstock] = malloc(sizeof(stock));
   int id;
@@ -63,107 +56,45 @@ void lertxt(stock *stock_ptr[sizeof(stock)],int *countstock, struct item *item[s
   float cost;
   char a;
   int noitem = 0;
-  stock_ptr[*countstock]->amount = 1;
-  //Leitura do stock.txt de modo a ver a quantidade inicial
-  //ps: para atualizar existe no final um codigo que coloca todas as informações da estrutura para o stock.txt
   FILE *fp;
   fp = fopen("files/stock.txt","r");
   if (fp!=NULL){  
     do{
       fscanf(fp, "%d %s %f", &id, name, &cost);
-      printf("scanf\n\n");
       if (*countstock == 0){
         stock_ptr[*countstock] -> id = id;
         strcpy(stock_ptr[*countstock] -> name, name);
         stock_ptr[*countstock] -> cost = cost;
-        item[*countstock] -> id = id;
         stock_ptr[*countstock+1] = malloc(sizeof(stock));
-        item[*countstock+1] = malloc(sizeof(struct item));
         *countstock +=1; 
-        printf("Primeiro item\n\n");
       }
       else{
-        printf("Else\n\n");
         for(int i = 0; i<*countstock; i++){
-          printf("begin for\n\n");
-          printf("i: %d",i);
-          printf("stock_ptr compared %d\n",stock_ptr[i]->id);
-          printf("id compared %d\n",id);
           if(stock_ptr[i]->id == id){
             noitem=0;
             stock_ptr[i]->amount += 1;
-            printf("Added\n");
             break;
           }
           else{noitem=1;}
         }
-        printf("End of for \n\n");
       }
-        if(noitem==1){
-          printf("olá1\n");
-          printf("countstock before  %d",*countstock);
-          printf("countstock after    %d",*countstock);
-          printf("olá2\n\n");
-          stock_ptr[*countstock] -> amount = 1;
-          printf("amount\n");
-          stock_ptr[*countstock] -> id = id;
-          item[*countstock] -> id = id;
-          printf("stock_ptr2   %d\n\n",stock_ptr[2]->id);
-          printf("id\n");
-          printf("stock lido:%d     stock_ptr:%d\n\n\n",id,stock_ptr[*countstock]->id);
-          strcpy(stock_ptr[*countstock] -> name, name);
-          printf("nome\n");
-          stock_ptr[*countstock] -> cost = cost;
-          printf("cost\n");
-          noitem = 0;
-          stock_ptr[*countstock+1] = malloc(sizeof(stock));
-          item[*countstock] = malloc(sizeof(struct item));
-          *countstock += 1;
+      if(noitem==1){
+        stock_ptr[*countstock] -> amount = 1;
+        stock_ptr[*countstock] -> id = id;
+        strcpy(stock_ptr[*countstock] -> name, name);
+        stock_ptr[*countstock] -> cost = cost;
+        noitem = 0;
+        stock_ptr[*countstock+1] = malloc(sizeof(stock));
+        *countstock += 1;
         }
-        printf("%d countstock\n\n",*countstock);
-        printf("End of loop\n\n\n");
     }while((a=fgetc(fp))!=EOF);
-    /*while(fgets(text,20,fp)){
-      a = text[0];
-      switch (a){
-        case '1': countF++;break;
-        case '2': countAl++;break;
-        case '3': countV++;break;
-        case '4': countP++;break;
-        case '5': countB++;break;
-        case '6': countAc++;break;
-      }
-    }*/
     fclose(fp);
   }
-  //define o tamanho de cada elemento do vetor de pointers
- /* stock_ptr[0]= malloc(sizeof(ferro));
-  stock_ptr[1]= malloc(sizeof(aluminio));
-  stock_ptr[2]= malloc(sizeof(vidro));
-  stock_ptr[3]= malloc(sizeof(plastico));
-  stock_ptr[4]= malloc(sizeof(borracha));
-  stock_ptr[5]= malloc(sizeof(aco));
-  //define a quantidade de cada material na structure
-  ferro.amount= countF;
-  aluminio.amount= countAl;
-  vidro.amount= countV;
-  plastico.amount= countP;
-  borracha.amount= countB;
-  aco.amount= countAc;
-  //aponta o stock_ptr pela ordem ao seu correspondente material
-  stock_ptr[0]= &ferro;
-  stock_ptr[1]= &aluminio;
-  stock_ptr[2]= &vidro;
-  stock_ptr[3]= &plastico;
-  stock_ptr[4]= &borracha;
-  stock_ptr[5]= &aco;
-  */
 }
-
 // Read Files Function -> Stores in strings
-void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *countstock, struct item *item[sizeof(struct item)]){
+void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *countstock, stock *stock_ptr[sizeof(stock)], int *fin, car *finished[sizeof(car)]){
   //Process.txt variables
-  struct item *itemtemp[sizeof(*item)]
+  item *itemtemp[sizeof(item)];
   char carname[15];
   char processstate[15];
   char processesleft[6];
@@ -177,6 +108,8 @@ void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *count
   FILE *fp;
   FILE *cp;
   //Abrir processing.txt
+  processing[queue] = malloc(sizeof(car));
+  printf("queue: %d\n\n", queue);
   fp = fopen("files/processing.txt","r");
   if (fp!=NULL){
     do{
@@ -187,38 +120,72 @@ void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *count
       if (local == '-'){local = '0';}
       //Opened carmodel.txt to compare to the car currently being used on this loop of processing.txt
       cp = fopen("files/carmodel.txt","r");
-      if(cp!=NULL){
-        do{
-          fscanf(cp,"%d %s ", &tempcar.id ,tempcar.name);
-          for (i=0;i<*countstock;i++){
-            fscanf(cp,"%d ",*itemtemp[i]->amount);
-            itemtemp[i+1] = malloc(sizeof(struct item));
+          if(cp!=NULL){
+            do{
+              fscanf(cp,"%d %s ", &tempcar.id ,tempcar.name);
+              printf("tempcar:%d\n\n",tempcar.id);
+              for (i=0;i<*countstock;i++){
+                itemtemp[i]->id = (i+1);
+                fscanf(cp,"%d ",&itemtemp[i]->amount);
+                itemtemp[i+1] = malloc(sizeof(item));
+              }
+              fscanf(cp,"%d %d %s", &tempcar.std, &tempcar.fabproc.timeleft, tempcar.fabproc.opso);
+              //If the car in carmode.txt is equal to the car in processing.txt we store it in a queue of cars and change to the current information
+              if (strcmp(tempcar.name, carname)==0){
+                printf("queue: %d\n\n", queue);
+                printf("tempcar id2:%d\n\n ",tempcar.id );
+                processing[queue]->id = tempcar.id;
+                printf("processing:%d\n\n ",processing[queue]->id);
+                strcpy(processing[queue]->name, carname);
+                printf("Name %d : %s\n\n",queue, processing[queue]->name);
+              //  processing[queue]->itemcar[i].id = itemtemp[i]->id;
+                printf("1\n\n");
+              // processing[queue]->itemcar[i].amount = itemtemp[i]->amount;
+                printf("2\n\n");
+                processing[queue]->std = local-48;
+                printf("3\n\n");
+                processing[queue]->fabproc.timeleft = timel;
+                printf("4\n\n");
+                strcpy(processing[queue]->fabproc.opso, processesleft);
+                printf("5\n\n");
+                processing[queue+1] = malloc(sizeof(car));
+                queue++; 
+              }
+            }while((aux1 = fgetc(cp))!=EOF);
           }
-          fscanf(cp,"%d %d %s", &tempcar.std, &tempcar.fabproc.timeleft, tempcar.fabproc.opso);
-          //If the car in carmode.txt is equal to the car in processing.txt we store it in a queue of cars and change to the current information
-          if (strcmp(tempcar.name, carname)==0){
-            processing[queue]->id = tempcar.id;
-            strcpy(processing[queue]->name, tempcar.name);
-            for(i=0;i<*countstock;i++){
-              processing[queue]->item[i] = itemtemp[i];
-            }
-            processing[queue]->std = tempcar.std;
-            processing[queue]->fabproc.timeleft = tempcar.fabproc.timeleft;
-            strcpy(processing[queue]->fabproc.opso, tempcar.fabproc.opso);
-          }
-
-        }while((aux1 = fgetc(cp))!=EOF);
-      }
       fclose(cp);
-      processing[queue+1] = malloc(sizeof(car));
-      queue++;
-    } 
+      
+      
+    }
     }while((aux = fgetc(fp))!= EOF);
     fclose(fp);
   }
   
 }
-
+void r_finished(car *finished[sizeof(car)], int fin){
+  char carname[15];
+  char processstate[15];
+  //Auxiliary variables (Check for EOF)
+  char aux;
+  //Create a temporary car imported from carmodel.txt(database of all cars) 
+  struct car tempcar;
+  FILE *fp;
+  //Abrir processing.txt
+  finished[fin] = malloc(sizeof(car));
+  fp = fopen("files/processing.txt","r");
+  if (fp!=NULL){
+    do{
+    int i=0;
+    fscanf(fp,"%s %s %*c %*d %*s",carname ,processstate);
+    if(strcmp(processstate, "Finished") == 0){
+      strcpy(finished[fin]->name,carname);
+      finished[fin+1] = malloc(sizeof(car));
+      fin++;
+    }
+    }while((aux = fgetc(fp))!= EOF);
+    fclose(fp);
+  }
+}
 void view_stock(stock *stock_ptr[sizeof(stock)],float ct, int *countstock) {
   system("clear");
   char user;
@@ -230,7 +197,7 @@ void view_stock(stock *stock_ptr[sizeof(stock)],float ct, int *countstock) {
     printf("        ***STOCK***         \n\n");
     printf("ID   Type       Price    Qt.\n\n");
     for(i = 0; i < *countstock; i++){
-      printf("%d   %s     %.2f  %d\n", stock_ptr[i]->id, stock_ptr[i]->name, stock_ptr[i]->cost, stock_ptr[i]->amount);
+      printf("%d    %s  \t %.2f\t %d\n", stock_ptr[i]->id, stock_ptr[i]->name, stock_ptr[i]->cost, stock_ptr[i]->amount);
     }
     printf("\n");
     printf("Total cost: %.2f€\n\n",ct);
@@ -257,10 +224,10 @@ void refill_stock(stock *stock_ptr[sizeof(stock)], int *countstock) {
     stock_ptr[user_id-1]->amount += user_qnt;
 }
 
-void carP(car *processing[sizeof(car)],int queue, char *stationsv){
-  r_files(processing,queue,stationsv);
+void carP(car *processing[sizeof(car)],int queue, char *stationsv,int *countstock, stock *stock_ptr[sizeof(stock)]){
   system("clear");
   int choice;
+  char answer;
   char aux;
   
   char name[15];
@@ -279,33 +246,55 @@ void carP(car *processing[sizeof(car)],int queue, char *stationsv){
   fclose(cp);
   printf("Sua opção: ");
   scanf("%d", &choice);
+  getchar();
   cp = fopen("files/carmodel.txt","r");
   if(cp!=NULL){
   for(int i=0;i<choice;i++){
-    fscanf(cp,"%d %s %d %d %d %d %d %d %d %d %s",&newcar.id,newcar.name,&newcar.item.carF,&newcar.item.carAl,&newcar.item.carV,&newcar.item.carP,&newcar.item.carB,&newcar.item.carAc,&newcar.std,&newcar.fabproc.timeleft,newcar.fabproc.opso);
+    fscanf(cp,"%d %s ",&newcar.id,newcar.name);
+    for (int j=0;j<*countstock;j++){
+      newcar.itemcar[j].id = j+1;
+      fscanf(cp,"%d ",&newcar.itemcar[j].amount);
+    }
+    fscanf(cp,"%d %d %s", &newcar.std,&newcar.fabproc.timeleft,newcar.fabproc.opso);
+    }
+  printf("\nAo produzir um %s vai usar os items listados abaixo: \n", newcar.name);
+  for(int i=0;i<*countstock;i++){
+    printf("\t%d ",newcar.itemcar[i].amount);
+    for(int j=0;j<*countstock;j++){
+      if(newcar.itemcar[i].id == stock_ptr[j]->id){printf("%s\n", stock_ptr[j]->name);}
+    }
   }
-
+  printf("\nTem a certeza que pretende continuar?: ");
+  scanf("%c", &answer);
   if((answer == 'y')||(answer == 'Y')){
+    for(int i =0;i<*countstock;i++){
+      stock_ptr[i]->amount -= newcar.itemcar[i].amount;
+    } 
     processing[queue]->id = newcar.id;
     strcpy(processing[queue]->name, newcar.name);
-    processing[queue]->item.carF = newcar.item.carF;
-    processing[queue]->item.carAl = newcar.item.carAl;
-    processing[queue]->item.carV = newcar.item.carV;
-    processing[queue]->item.carP = newcar.item.carP;
-    processing[queue]->item.carB = newcar.item.carB;
-    processing[queue]->item.carAc = newcar.item.carAc;
+    for(int i=0;i<*countstock; i++){
+      processing[queue]->itemcar[i].id = newcar.itemcar[i].id;
+      processing[queue]->itemcar[i].amount = newcar.itemcar[i].amount;
+      (processing[queue]->itemcar) = malloc(sizeof(item)*(*countstock));
+    }
     processing[queue]->std = newcar.std;
     processing[queue]->fabproc.timeleft = newcar.fabproc.timeleft;
     strcpy(processing[queue]->fabproc.opso, newcar.fabproc.opso);
+  
+    FILE *fp;
+    fp = fopen("files/processing.txt", "a");
+    if(fp!=NULL){
+      system("pwd");
+      fprintf(fp,"\n%s Waiting - 0 %s",processing[queue]->name,processing[queue]->fabproc.opso);
+    }
+    fclose(fp);
+    
   }
+  else{
+    system("clear");
+    }
   }
-  fclose(cp);
-  FILE *fp;
-  fp = fopen("files/processing.txt", "a");
-  if(fp!=NULL){
-    fprintf(fp,"\n%s Waiting - 0 %s",processing[queue]->name,processing[queue]->fabproc.opso);
-  }
-  fclose(fp);
+  system("clear");
   processing[queue+1] = malloc(sizeof(car));
   queue++;
 }
@@ -331,9 +320,8 @@ void build_car_display() {
   printf("  B - Back\n\n");
   printf("Opção: ");
 }
-
 void factory_state_display() {
-//display da opção 4 (factory state)
+//display da opção 4 (factory o_to
   printf("        ***Factory State Menu***         \n\n");
   printf("  1 - Show all processes\n");
   printf("  2 - Show processes by type\n");
@@ -396,7 +384,7 @@ void stats_interface() {
       do {
         stats_display();
         scanf(" %c", &user);
-//dá a hipotese do user ir utilizar cada opção do menu que diz stats (opção 5)
+//dá a hipotese do user ir utilizcar *processing[sizeof(car)],int queuecar *processing[sizeof(car)],int queuear cada opção do menu que diz stats (opção 5)
       switch(user) {
         case '1': break;
         case '2': break;
@@ -406,21 +394,38 @@ void stats_interface() {
     }
   }while(user != 'B' && user != 'b');
 }
-
+void time_skip(int currenttime,car *processing[sizeof(car)],int queue,car *finished[sizeof(car)],int fin){
+  int timeadded;
+  printf("Insira o tempo que pretende que passe (em minutos): ");
+  scanf("%d", &timeadded);
+  currenttime += timeadded;
+  for(int i=0; i<queue; i++){
+    if((processing[i]->std != 0) && (processing[i]->std != -1)){
+      processing[i]->fabproc.timeleft -= timeadded;
+      if(processing[i]->fabproc.timeleft <= 0){
+        
+      }
+    }
+  }
+}
 void main(){
+  int currenttime=0;
   int queue=0;
+  int fin=0;
   char *user = calloc(1000, sizeof(char));
   char *stationsv= calloc(1000, sizeof(char));
   stations station[5];
   car *processing[sizeof(car)];
+  car *finished[sizeof(car)];
   float custo_total= 0;
   stock *stock_ptr[sizeof(stock)];
   int stockcount = 0;
   int *countstock;
   countstock = &stockcount;
-  struct item *item[sizeof(struct item)];
+  //car.itemcar = malloc(sizeof(item));
   lertxt(stock_ptr,countstock);
-  r_files(processing,queue,stationsv,countstock,item);
+  r_files(processing,queue,stationsv,countstock,stock_ptr, &fin);
+  r_finished(finished,fin);
   ler_stations(station);
   do {
     system("clear");
@@ -433,13 +438,13 @@ void main(){
       case '1': custo_total= 0;
                 for(int i= 0; i < *countstock; i++)
                    custo_total += ((*stock_ptr[i]).cost)*((*stock_ptr[i]).amount);
-                view_stock(stock_ptr, custo_total,countstock,item);
+                view_stock(stock_ptr, custo_total,countstock);
                 system("clear");
                 break;
       case '2': refill_stock(stock_ptr,countstock);
                 system("clear");
                 break;
-      case '3': carP(processing,queue,stationsv,item);
+      case '3': carP(processing,queue,stationsv,countstock,stock_ptr);
                 system("clear");
                 break;
       case '4': factory_state_interface();
@@ -448,7 +453,8 @@ void main(){
       case '5': stats_interface();
                 system("clear");
                 break;
-      case '6': break;
+      case '6': time_skip(currenttime, processing, queue, finished,fin);
+                break;
       default: continue;
     } 
   } while(strchr(user,'E')== 0 && strchr(user,'e')==0);
