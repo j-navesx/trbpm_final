@@ -92,7 +92,7 @@ void lertxt(stock *stock_ptr[sizeof(stock)],int *countstock) {
   }
 }
 // Read Files Function -> Stores in strings
-void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *countstock, stock *stock_ptr[sizeof(stock)], int *fin, car *finished[sizeof(car)]){
+void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *countstock, stock *stock_ptr[sizeof(stock)]){
   //Process.txt variables
   item *itemtemp[sizeof(item)];
   char carname[15];
@@ -424,7 +424,7 @@ void main(){
   countstock = &stockcount;
   //car.itemcar = malloc(sizeof(item));
   lertxt(stock_ptr,countstock);
-  r_files(processing,queue,stationsv,countstock,stock_ptr, &fin);
+  r_files(processing,queue,stationsv,countstock,stock_ptr);
   r_finished(finished,fin);
   ler_stations(station);
   do {
