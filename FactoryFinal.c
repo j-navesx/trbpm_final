@@ -97,10 +97,9 @@ void lertxt(stock *stock_ptr[sizeof(stock)],int *countstock) {
   }
 }
 // Read Files Function -> Stores in strings
-void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *countstock, stock *stock_ptr[sizeof(stock)], int *countProdution_ptr, car *finished[sizeof(car)]){
+void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *countstock, stock *stock_ptr[sizeof(stock)], int *countProdution_ptr){
   //Process.txt variables
   item *itemtemp[sizeof(item)];
-  itemtemp[0]= malloc(sizeof(item));
   char carname[15];
   char processstate[15];
   char processesleft[6];
@@ -122,16 +121,16 @@ void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *count
     int i=0;
     fscanf(fp,"%s %s %c %d %s",carname ,processstate, &local, &timel, processesleft);
     if((strcmp(processstate,"Processing")==0)||(strcmp(processstate,"Waiting")==0)){
-        *countProdution_ptr += 1;
+      *countProdution_ptr += 1;
+      // Changed from '-' to '0' for easy compreension
+      if (local == '-'){local = '0';}
       //Opened carmodel.txt to compare to the car currently being used on this loop of processing.txt
       cp = fopen("files/carmodel.txt","r");
           if(cp!=NULL){
             do{
-              /*fscanf(cp,"%d %s ", &tempcar.id ,tempcar.name);*/
-              fscanf(cp,"%d %s %*d %*d %*d %*d %*d %*d %*c %*d %*s", &tempcar.id ,tempcar.name);
+              fscanf(cp,"%d %s ", &tempcar.id ,tempcar.name);
+              printf("tempcar name %s\n\n", tempcar.name);
               printf("tempcar:%d\n\n",tempcar.id);
-              printf("tempcar name:%s\n\n",tempcar.name);
-              printf("%s\n\n",carname);
               for (i=0;i<*countstock;i++){
                 itemtemp[i]->id = (i+1);
                 fscanf(cp,"%d ",&itemtemp[i]->amount);
@@ -139,14 +138,11 @@ void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *count
               }
               fscanf(cp,"%c %d %s", &tempcar.std, &tempcar.fabproc.timeleft, tempcar.fabproc.ops);
               //If the car in carmode.txt is equal to the car in processing.txt we store it in a queue of cars and change to the current information
-              printf("%s\n\n",carname);
               if (strcmp(tempcar.name, carname)==0){
-                printf("ola\n");
                 printf("queue: %d\n\n", queue);
                 printf("tempcar id2:%d\n\n ",tempcar.id );
                 processing[queue]->id = tempcar.id;
                 printf("processing:%d\n\n ",processing[queue]->id);
-                strcpy(processing[queue]->processstate,processstate);
                 strcpy(processing[queue]->name, carname);
                 printf("Name %d : %s\n\n",queue, processing[queue]->name);
               //  processing[queue]->itemcar[i].id = itemtemp[i]->id;
@@ -154,6 +150,7 @@ void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *count
               // processing[queue]->itemcar[i].amount = itemtemp[i]->amount;
                 printf("2\n\n");
                 processing[queue]->std = local;
+                strcmp(processing[queue]->processstate,processstate);
                 printf("3\n\n");
                 processing[queue]->fabproc.timeleft = timel;
                 printf("4\n\n");
@@ -165,11 +162,14 @@ void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *count
             }while((aux1 = fgetc(cp))!=EOF);
           }
       fclose(cp);
+      
+      
     }
     }while((aux = fgetc(fp))!= EOF);
     fclose(fp);
   }
 }
+
 void r_finished(car *finished[sizeof(car)], int *fin){
   char carname[15];
   char processstate[15];
@@ -515,7 +515,7 @@ void main(){
   countstock = &stockcount;
   //car.itemcar = malloc(sizeof(item));
   lertxt(stock_ptr,countstock);
-  r_files(processing,queue,stationsv,countstock,stock_ptr,countProdution_ptr,finished);
+  r_files(processing,queue,stationsv,countstock,stock_ptr,countProdution_ptr);
   r_finished(finished,finish_count);
   ler_stations(station);
   printf("%d\n", *countProdution_ptr);

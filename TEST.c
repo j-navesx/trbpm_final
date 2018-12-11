@@ -21,10 +21,14 @@ typedef struct stations
 }stations;
 
 //Stations State
-struct stations_use
+typedef struct stations_use
 {
   int used;
-} st1 = {-1},st2 = {-1}, st3 = {-1}, st4 = {-1}, st5 = {-1};
+  char operations;
+  char carname[10];
+  char opName[15];
+  char state[15];
+} stations_use;
 
 typedef struct item
 {
@@ -39,6 +43,7 @@ typedef struct car
   char name[10];
   struct item *itemcar;
   int std;
+  char processstate[20];
   struct fab_proc
   {
     //Tempo restante
@@ -92,7 +97,7 @@ void lertxt(stock *stock_ptr[sizeof(stock)],int *countstock) {
   }
 }
 // Read Files Function -> Stores in strings
-void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *countstock, stock *stock_ptr[sizeof(stock)], int *fin, car *finished[sizeof(car)]){
+void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *countstock, stock *stock_ptr[sizeof(stock)], int *countprodution){
   //Process.txt variables
   item *itemtemp[sizeof(item)];
   char carname[15];
@@ -145,6 +150,7 @@ void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *count
                 processing[queue]->std = local-48;
                 printf("3\n\n");
                 processing[queue]->fabproc.timeleft = timel;
+                strcpy(processing[queue]->processstate, processstate);
                 printf("4\n\n");
                 strcpy(processing[queue]->fabproc.opso, processesleft);
                 printf("5\n\n");
@@ -159,10 +165,12 @@ void r_files(car *processing[sizeof(car)],int queue, char *stationsv, int *count
     }
     }while((aux = fgetc(fp))!= EOF);
     fclose(fp);
+    *countprodution= queue;
   }
   
 }
-void r_finished(car *finished[sizeof(car)], int fin){
+
+void r_finished(car *finished[sizeof(car)], int fin, int *finish){
   char carname[15];
   char processstate[15];
   //Auxiliary variables (Check for EOF)
@@ -185,6 +193,7 @@ void r_finished(car *finished[sizeof(car)], int fin){
     }while((aux = fgetc(fp))!= EOF);
     fclose(fp);
   }
+  *finish= fin;
 }
 void view_stock(stock *stock_ptr[sizeof(stock)],float ct, int *countstock) {
   system("clear");
@@ -225,7 +234,6 @@ void refill_stock(stock *stock_ptr[sizeof(stock)], int *countstock) {
 }
 
 void carP(car *processing[sizeof(car)],int queue, char *stationsv,int *countstock, stock *stock_ptr[sizeof(stock)]){
-  system("clear");
   int choice;
   char answer;
   char aux;
@@ -284,17 +292,14 @@ void carP(car *processing[sizeof(car)],int queue, char *stationsv,int *countstoc
     FILE *fp;
     fp = fopen("files/processing.txt", "a");
     if(fp!=NULL){
-      system("pwd");
       fprintf(fp,"\n%s Waiting - 0 %s",processing[queue]->name,processing[queue]->fabproc.opso);
     }
     fclose(fp);
     
   }
   else{
-    system("clear");
     }
   }
-  system("clear");
   processing[queue+1] = malloc(sizeof(car));
   queue++;
 }
@@ -309,8 +314,139 @@ void ler_stations(stations station[5]) {
     fclose(fp);
 }
 
+void map_display(stations_use st[5]) {
+  system("clear");
+  char user;
+
+  do {
+  printf("\n       ***Factory Map***\n\n");
+  printf("   1     2     3     4     5   \n");
+  printf(" ----- ----- ----- ----- ----- \n");
+  printf("|  %c  |  %c  |  %c  |  %c  |  %c  |\n",st[0].operations,st[1].operations,st[2].operations,st[3].operations,st[4].operations);
+  printf(" ----- ----- ----- ----- ----- \n\n");
+  getchar();
+  scanf("%c",&user);
+  }while(user != '\n');
+}
+
+void machine_state_display(stations_use st[5]) {
+  system("clear");
+  char user;
+  int i;
+
+  do {
+    printf("\n       ***Factory_State***\n\n");
+    printf("\t\t   State \t    Type \t    Op.\n\n");
+    for(i= 0; i<5 ; i++) {
+      printf("Station Nº:%d \t %s \t   %s \t   %s\n",i+1,st[i].state, st[i].carname, st[i].opName);
+    }
+    getchar();
+    scanf("%c",&user);
+  }while(user != '\n');
+}
+
+void machine_info_display(stations station[5]) {
+  system("clear");
+
+  char user;
+
+  do {
+  printf("       ***Stations***         \n\n");
+  printf("ID \t Operations \t Durations \t Cost.Min \t Oper.Time\n\n");
+  for(int i= 0; i < 5; i++) {
+    printf("%d \t %c-%c-%c \t\t %d-%d-%d \t %.2f \t\t %d\n",station[i].id, station[i].ops[0], station[i].ops[1],
+     station[i].ops[2], station[i].temp_ops[0], station[i].temp_ops[1], station[i].temp_ops[2], station[i].cost,
+     station[i].temp_final);
+  }
+  printf("\n");
+  getchar();
+  scanf("%c", &user);
+  }while(user != '\n');
+}
+
+void Search_by_state(car *processing[], int *countprodution, car *finished[sizeof(car)], int *finish) {
+  char user_str[20];
+  char user;
+  char aux;
+
+  printf("State: ");
+  getchar();
+  scanf("%s", user_str);
+
+  system("clear");
+  do {
+    printf("\t\t  ***Produtions***\n\n");
+    printf("Type \t\t State \t\t Local \t Time left \t ops.\n\n");
+    for(int i= 0; i < *countprodution; i++) {
+      if(strcmp(user_str,processing[i]->processstate) == 0) {
+        if(processing[i]->std == 0) {aux = '-';}
+        else {aux = processing[i]->std + 48;}
+        printf("%s    \t %s \t   %c \t     %d    \t %s\n", processing[i]->name, processing[i]->processstate, aux, processing[i]->fabproc.timeleft, processing[i]->fabproc.opso);
+      }
+    }
+    for(int j= 0; j< *finish; j++) {
+        if(strcmp(user_str,"Finished") == 0) {
+        printf("%s    \t Finished \t   - \t     0    \t ---\n", finished[j]->name);
+        }
+    }
+    getchar();
+    scanf("%c",&user);
+  }while( user != '\n');
+}
+
+void Search_by_type(car *processing[], int *countprodution, car *finished[sizeof(car)], int *finish) {
+  char user_str[20];
+  char user;
+  char aux;
+
+  printf("Type: ");
+  getchar();
+  scanf("%s", user_str);
+
+  system("clear");
+  do {
+    printf("\t\t  ***Produtions***\n\n");
+    printf("Type \t\t State \t\t Local \t Time left \t ops.\n\n");
+    for(int i= 0; i < *countprodution; i++) {
+      if(strcmp(user_str,processing[i]->name) == 0) {
+        if(processing[i]->std == 0) {aux = '-';}
+        else {aux = processing[i]->std + 48;}
+        printf("%s    \t %s \t   %c \t     %d    \t %s\n", processing[i]->name, processing[i]->processstate, aux, processing[i]->fabproc.timeleft, processing[i]->fabproc.opso);
+      }
+    }
+    for(int j= 0; j< *finish; j++) {
+        if(strcmp(user_str,finished[j]->name) == 0) {
+        printf("%s    \t Finished \t   - \t     0    \t ---\n", finished[j]->name);
+        }
+    }
+    getchar();
+    scanf("%c",&user);
+  }while( user != '\n');
+}
+
+void processes_display(car *processing[], int *countprodution, int *finish, car *finished[]) {
+  char user;
+  char aux;
+  
+  system("clear");
+  do {
+    printf("\t\t  ***Produtions***\n\n");
+    printf("Type \t\t State \t\t Local \t Time left \t ops.\n\n");
+    for (int i= 0; i < *countprodution; i++) {
+      if(processing[i]->std == 0) {aux = '-';}
+      else {aux = processing[i]->std + 48;}
+      printf("%s    \t %s \t   %c \t     %d    \t %s\n", processing[i]->name, processing[i]->processstate, aux, processing[i]->fabproc.timeleft, processing[i]->fabproc.opso);
+    }
+    for(int j= 0; j < *finish; j++) {
+      printf("%s    \t Finished \t   - \t     0    \t ---\n", finished[j]->name);
+      }
+    getchar();
+    scanf("%c",&user);
+  }while( user != '\n');
+}
+
 void build_car_display() {
-//display da opção 3 (display car)
+  //display da opção 3 (display car)
   printf("        ***Product List Menu***         \n\n");
   printf("  1 - Ford\n");
   printf("  2 - Renault\n");
@@ -321,7 +457,7 @@ void build_car_display() {
   printf("Opção: ");
 }
 void factory_state_display() {
-//display da opção 4 (factory o_to
+  //display da opção 4 (factory o_to
   printf("        ***Factory State Menu***         \n\n");
   printf("  1 - Show all processes\n");
   printf("  2 - Show processes by type\n");
@@ -334,7 +470,7 @@ void factory_state_display() {
 }
 
 void stats_display() {
-//display da opção 5 (stats)
+  //display da opção 5 (stats)
   printf("        ***Factory Stats Menu***         \n\n");
   printf("  1 - Finished products by type\n");
   printf("  2 - Products state\n");
@@ -344,7 +480,7 @@ void stats_display() {
 }
 
 void menu_display() {
-//display do menu principal
+  //display do menu principal
   printf("\n\t\t***Factory Admin Menu***\n\n");
   printf("1- Show stock\n");
   printf("2- Refill stock\n");
@@ -356,20 +492,26 @@ void menu_display() {
   printf("Option: ");
 }
 
-void factory_state_interface() {
+void factory_state_interface(stations station[5], stations_use st[5], car *processing[sizeof(car)], int *countprodution, car *finished[sizeof(car)], int *finish) {
   system("clear");
   char user;
   do {
     factory_state_display();
     scanf(" %s", &user);
-//dá a hipotese do user ir utilizar cada opção do menu que diz factory state (opção 4)
+  //dá a hipotese do user ir utilizar cada opção do menu que diz factory state (opção 4)
     switch(user) {
-      case '1': break;
-      case '2': break;
-      case '3': break;
-      case '4': break;
-      case '5': break;
-      case '6': break;
+      case '1': processes_display(processing,countprodution,finish,finished);
+                break;
+      case '2': Search_by_type(processing,countprodution,finished,finish);
+                break;
+      case '3': Search_by_state(processing,countprodution,finished,finish);
+                break;
+      case '4': machine_state_display(st);
+                break;
+      case '5': machine_info_display(station);
+                break;
+      case '6': map_display(st);
+                break;
       default: system("clear");
                continue;
 
@@ -384,7 +526,7 @@ void stats_interface() {
       do {
         stats_display();
         scanf(" %c", &user);
-//dá a hipotese do user ir utilizcar *processing[sizeof(car)],int queuecar *processing[sizeof(car)],int queuear cada opção do menu que diz stats (opção 5)
+  //dá a hipotese do user ir utilizcar *processing[sizeof(car)],int queuecar *processing[sizeof(car)],int queuear cada opção do menu que diz stats (opção 5)
       switch(user) {
         case '1': break;
         case '2': break;
@@ -409,13 +551,70 @@ void time_skip(int currenttime,car *processing[sizeof(car)],int queue,car *finis
   }
 }
 
+void stations_process(stations_use st[5]) {
+  char aux;
+  int countaux= 0;
+  int i,j,h,k;
+  int count=0;
+  char name[10], processstate[10], std, processesleft[5];
+  int timeleft;
+
+  for(j= 0; j < 5; j++) {
+    st[j].used= -1;
+    strcpy(st[j].carname,"   -");
+    strcpy(st[j].opName,"   -");
+  }
+  FILE *fp;
+  fp= fopen("files/processing.txt","r");
+  do {
+    fscanf(fp,"%s %s %c %d %s", name, processstate, &std, &timeleft, processesleft);
+    if(std != '-') {
+      for(i= 0; i < 3; i++) {
+        if(processesleft[i] != '-') {
+          strcpy(st[std-48-1].carname,name);
+          st[std-48-1].operations= processesleft[i];
+          break;
+        }
+      }
+      st[std-48-1].used= 1;
+    }
+  }while(aux= fgetc(fp) != EOF);
+  fclose(fp);
+  for(k= 0; k<5 ; k++) {
+    if(st[k].operations < 'A' || st[k].operations > 'E') {
+      st[k].operations= '-';
+    }
+  }
+  for(h= 0; h<5 ; h++) {
+    switch(st[h].operations) {
+      case 'A': strcpy(st[h].opName,"Soldering"); break;
+      case 'B': strcpy(st[h].opName,"Cuting"); break;
+      case 'C': strcpy(st[h].opName,"Painting"); break;
+      case 'D': strcpy(st[h].opName,"Assembling"); break;
+      case 'E': strcpy(st[h].opName,"Finishing"); break;
+      default: strcpy(st[h].opName,"-"); break;
+    }
+    if(st[h].used == -1) {
+      strcpy(st[h].state,"   Idle");
+    }
+    else {
+      strcpy(st[h].state,"Processing");
+    }
+  }
+}
+
 void main(){
   int currenttime=0;
   int queue=0;
+  int count= 0;
+  int *countprodution= &count;
   int fin=0;
+  int fincount= 0;
+  int *finish= &fincount;
   char *user = calloc(1000, sizeof(char));
   char *stationsv= calloc(1000, sizeof(char));
   stations station[5];
+  stations_use st[5];
   car *processing[sizeof(car)];
   car *finished[sizeof(car)];
   float custo_total= 0;
@@ -425,9 +624,12 @@ void main(){
   countstock = &stockcount;
   //car.itemcar = malloc(sizeof(item));
   lertxt(stock_ptr,countstock);
-  r_files(processing,queue,stationsv,countstock,stock_ptr, &fin,finished);
-  r_finished(finished,fin);
+  r_files(processing,queue,stationsv,countstock,stock_ptr,countprodution);
+  r_finished(finished,fin,finish);
   ler_stations(station);
+  stations_process(st);
+  printf("%d\n",*countprodution);
+  printf("%d\n",*finish);
   do {
     system("clear");
     menu_display();
@@ -448,7 +650,7 @@ void main(){
       case '3': carP(processing,queue,stationsv,countstock,stock_ptr);
                 system("clear");
                 break;
-      case '4': factory_state_interface();
+      case '4': factory_state_interface(station,st,processing,countprodution,finished,finish);
                 system("clear");
                 break;
       case '5': stats_interface();
