@@ -194,6 +194,7 @@ void r_finished(car *finished[sizeof(car)], int *fin){
     fclose(fp);
   }
 }
+
 void view_stock(stock *stock_ptr[sizeof(stock)],float ct, int *countstock) {
   system("clear");
   char user;
@@ -390,7 +391,7 @@ void Search_by_type(car *processing[], int *countProdution_ptr, car *finished[si
 }
 
 void build_car_display() {
-//display da opção 3 (display car)
+  //display da opção 3 (display car)
   printf("        ***Product List Menu***         \n\n");
   printf("  1 - Ford\n");
   printf("  2 - Renault\n");
@@ -400,8 +401,9 @@ void build_car_display() {
   printf("  B - Back\n\n");
   printf("Opção: ");
 }
+
 void factory_state_display() {
-//display da opção 4 (factory o_to
+  //display da opção 4 (factory o_to
   printf("        ***Factory State Menu***         \n\n");
   printf("  1 - Show all processes\n");
   printf("  2 - Show processes by type\n");
@@ -414,7 +416,7 @@ void factory_state_display() {
 }
 
 void stats_display() {
-//display da opção 5 (stats)
+  //display da opção 5 (stats)
   printf("        ***Factory Stats Menu***         \n\n");
   printf("  1 - Finished products by type\n");
   printf("  2 - Products state\n");
@@ -424,7 +426,7 @@ void stats_display() {
 }
 
 void menu_display() {
-//display do menu principal
+  //display do menu principal
   printf("\n\t\t***Factory Admin Menu***\n\n");
   printf("1- Show stock\n");
   printf("2- Refill stock\n");
@@ -442,7 +444,7 @@ void factory_state_interface(stations station[5], stations_use st[5], car *proce
   do {
     factory_state_display();
     scanf(" %s", &user);
-//dá a hipotese do user ir utilizar cada opção do menu que diz factory state (opção 4)
+  //dá a hipotese do user ir utilizar cada opção do menu que diz factory state (opção 4)
     switch(user) {
       case '1': processes_display(processing,countProdution_ptr);
                 break;
@@ -470,7 +472,7 @@ void stats_interface() {
       do {
         stats_display();
         scanf(" %c", &user);
-//dá a hipotese do user ir utilizcar *processing[sizeof(car)],int queuecar *processing[sizeof(car)],int queuear cada opção do menu que diz stats (opção 5)
+  //dá a hipotese do user ir utilizcar *processing[sizeof(car)],int queuecar *processing[sizeof(car)],int queuear cada opção do menu que diz stats (opção 5)
       switch(user) {
         case '1': break;
         case '2': break;
@@ -480,6 +482,7 @@ void stats_interface() {
     }
   }while(user != 'B' && user != 'b');
 }
+
 void time_skip(int currenttime,car *processing[sizeof(car)],int queue,car *finished[sizeof(car)],int fin){
   int timeadded;
   printf("Insira o tempo que pretende que passe (em minutos): ");

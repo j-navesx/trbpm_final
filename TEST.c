@@ -67,6 +67,7 @@ void lertxt(stock *stock_ptr[sizeof(stock)],int *countstock) {
     do{
       fscanf(fp, "%d %s %f", &id, name, &cost);
       if (*countstock == 0){
+        stock_ptr[*countstock] -> amount = 1;
         stock_ptr[*countstock] -> id = id;
         strcpy(stock_ptr[*countstock] -> name, name);
         stock_ptr[*countstock] -> cost = cost;
@@ -195,6 +196,7 @@ void r_finished(car *finished[sizeof(car)], int fin, int *finish){
   }
   *finish= fin;
 }
+
 void view_stock(stock *stock_ptr[sizeof(stock)],float ct, int *countstock) {
   system("clear");
   char user;
@@ -216,21 +218,29 @@ void view_stock(stock *stock_ptr[sizeof(stock)],float ct, int *countstock) {
 }
 
 void refill_stock(stock *stock_ptr[sizeof(stock)], int *countstock) {
-    system("clear");
-    int user_id;
-    int user_qnt;
-    //pede ao user o id do material e a quantidade do dito.
-    printf("Escolha um id\n");
-    for(int i=0; i<*countstock;i++){
-      printf("%d %s\n", stock_ptr[i]->id, stock_ptr[i]->name);
+  char a;
+  char text[20];
+  char aux[60]= "files/";
+  char usertext[50];
+  int i;
+
+  printf("filename: ");
+  scanf("%s", usertext);
+  printf("\n");
+  strcat(aux,usertext);
+  FILE *fp;
+  fp = fopen(aux,"r");
+  if (fp!=NULL){  
+    while(fgets(text,20,fp)){
+      a = text[0];
+      for(i= 0; i < *countstock; i++) {
+        if(a-48 == stock_ptr[i]->id) {
+          stock_ptr[i]->amount += 1;
+        }
+      }
     }
-    printf("\nOpção: ");
-    scanf("%d", &user_id);
-    printf("%s selected\n",(stock_ptr[user_id-1])->name);
-    printf("Quanto deseja adicionar?\n");
-    scanf("%d", &user_qnt);
-    //Adicionar a quantidade de um material à estrutura que o user escolher.
-    stock_ptr[user_id-1]->amount += user_qnt;
+    fclose(fp);
+  }
 }
 
 void carP(car *processing[sizeof(car)],int queue, char *stationsv,int *countstock, stock *stock_ptr[sizeof(stock)]){
@@ -456,6 +466,7 @@ void build_car_display() {
   printf("  B - Back\n\n");
   printf("Opção: ");
 }
+
 void factory_state_display() {
   //display da opção 4 (factory o_to
   printf("        ***Factory State Menu***         \n\n");
@@ -536,6 +547,7 @@ void stats_interface() {
     }
   }while(user != 'B' && user != 'b');
 }
+
 void time_skip(int currenttime,car *processing[sizeof(car)],int queue,car *finished[sizeof(car)],int fin){
   int timeadded;
   printf("Insira o tempo que pretende que passe (em minutos): ");
