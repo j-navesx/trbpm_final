@@ -194,6 +194,7 @@ void r_finished(car *finished[sizeof(car)], int *finish){
     fclose(fp);
   }
 }
+
 void view_stock(stock *stock_ptr[sizeof(stock)],float ct, int *countstock) {
   system("clear");
   char user;
@@ -241,6 +242,7 @@ void refill_stock(stock *stock_ptr[sizeof(stock)], int *countstock) {
 }
 
 void carP(car *processing[sizeof(car)], char *stationsv,int *countstock, stock *stock_ptr[sizeof(stock)], int *queue){
+  system("clear");
   int choice;
   char answer;
   char aux;
@@ -249,7 +251,7 @@ void carP(car *processing[sizeof(car)], char *stationsv,int *countstock, stock *
   int id;
   
   car newcar;
-  printf("\n\tEscolha o carro que pretende produzir:\n");
+  printf("\n\tEscolha o carro que pretende produzir:\n\n");
   FILE *cp;
   cp = fopen("files/carmodel.txt","r");
   if(cp!=NULL){
@@ -262,6 +264,7 @@ void carP(car *processing[sizeof(car)], char *stationsv,int *countstock, stock *
   printf("Sua opção: ");
   scanf("%d", &choice);
   getchar();
+  if(choice == 'b'){return;}
   cp = fopen("files/carmodel.txt","r");
   if(cp!=NULL){
   (newcar.itemcar) = malloc(sizeof(item)*(*countstock));
@@ -280,8 +283,9 @@ void carP(car *processing[sizeof(car)], char *stationsv,int *countstock, stock *
       if(newcar.itemcar[i].id == stock_ptr[j]->id){printf("%s\n", stock_ptr[j]->name);}
     }
   }
-  printf("\nTem a certeza que pretende continuar?: ");
+  printf("\nTem a certeza que pretende continuar?(Enter to exit): ");
   scanf("%c", &answer);
+  if((answer == 'b') ||(answer == 'B')){return;}
   if((answer == 'y')||(answer == 'Y')){
     for(int i =0;i<*countstock;i++){
       stock_ptr[i]->amount -= newcar.itemcar[i].amount;
@@ -433,6 +437,39 @@ void Search_by_type(car *processing[], int *queue, car *finished[sizeof(car)], i
   }while( user != '\n');
 }
 
+void finished_by_type(int *finish, car *finished[]) {
+  char user;
+
+  do {
+    getchar();
+    scanf("%c",&user);
+  }while( user != '\n');
+}
+
+void station_cost(stations station[5]) {
+  char user;
+  double totalcost= 0;
+  int totaltime= 0;
+
+  system("clear");
+  do {
+    printf("\t\t  ***Stations Info***\n\n");
+    printf("ID \t\t      Op.Time \t        Op.Cost\n\n");
+    for(int i= 0; i < 5; i++) {
+      printf("Station: %d \t\t %d \t\t %.2f€\n", i+1, station[i].temp_final, station[i].cost*station[i].temp_final);
+    }
+    printf("\n");
+    for(int j= 0; j < 5; j++) {
+      totalcost += station[j].cost*station[j].temp_final;
+      totaltime += station[j].temp_final;
+    }
+    printf("Total operating time:   %d mins\n", totaltime);
+    printf("Total cost:             %.2lf€\n", totalcost);
+    getchar();
+    scanf("%c",&user);
+  }while( user != '\n');
+}
+
 void processes_display(car *processing[], int *queue, int *finish, car *finished[]) {
   char user;
   char aux;
@@ -455,6 +492,7 @@ void processes_display(car *processing[], int *queue, int *finish, car *finished
 }
 
 void build_car_display() {
+  system("clear");
   //display da opção 3 (display car)
   printf("        ***Product List Menu***         \n\n");
   printf("  1 - Ford\n");
@@ -465,8 +503,8 @@ void build_car_display() {
   printf("  B - Back\n\n");
   printf("Opção: ");
 }
-
 void factory_state_display() {
+  system("clear");
   //display da opção 4 (factory o_to
   printf("        ***Factory State Menu***         \n\n");
   printf("  1 - Show all processes\n");
@@ -480,6 +518,7 @@ void factory_state_display() {
 }
 
 void stats_display() {
+  system("clear");
   //display da opção 5 (stats)
   printf("        ***Factory Stats Menu***         \n\n");
   printf("  1 - Finished products by type\n");
@@ -490,6 +529,7 @@ void stats_display() {
 }
 
 void menu_display() {
+  system("clear");
   //display do menu principal
   printf("\n\t\t***Factory Admin Menu***\n\n");
   printf("1- Show stock\n");
@@ -529,7 +569,7 @@ void factory_state_interface(stations station[5], stations_use st[5], car *proce
   }while(user != 'B' && user != 'b');
 }
 
-void stats_interface() {
+void stats_interface(car *finished[sizeof(car)], int *finish, stations station[5]) {
   system("clear");
   char user;
     
@@ -538,101 +578,132 @@ void stats_interface() {
         scanf(" %c", &user);
   //dá a hipotese do user ir utilizcar *processing[sizeof(car)],int queuecar *processing[sizeof(car)],int queuear cada opção do menu que diz stats (opção 5)
       switch(user) {
-        case '1': break;
+        case '1': finished_by_type(finish,finished);
+                  break;
         case '2': break;
-        case '3': break;
-        default:system("clear"); 
-                continue;
+        case '3': station_cost(station);
+                  break;
+        default: system("clear"); 
+                 continue;
     }
   }while(user != 'B' && user != 'b');
 }
-
 void time_skip(int currenttime,car *processing[sizeof(car)],int *finish, int *queue,car *finished[sizeof(car)], stock *stock_ptr[sizeof(stock)], int *countstock, stations_use st[5], stations station[5]){
-  FILE *pr;
-  FILE *stck;
-  FILE *std;
   int timeadded;
+  double aux= 1000;
+  double aux2;
   int k;
   int done;
-  int lesstime = 1000;
-  int stationless;
+  int count= 0;
+  //asks the user how time he wants the machine do skip
   printf("%s\n", finished[0]->name);
   printf("Insira o tempo que pretende que passe (em minutos): ");
   scanf("%d", &timeadded);
   do {
+    //every time it goes up, it curresponds to 1 min passed, so timeadded - 1 minute
     timeadded -= 1;
+    //finds the cars that have time in the clock and takes one away
+    //also does the same to the station, but in that case it adds, because one minute passed
     for(int i= 0; i < *queue; i++) {
       if(processing[i]->fabproc.timeleft != 0) {
         processing[i]->fabproc.timeleft -= 1;
         station[processing[i]->std-1].temp_final += 1;
       }
     }
+    //will apply every thing below to every car one by one
     for(int j= 0; j < *queue; j++) {
-      for(int h= 0; h < 5; h++) {
-        printf("%d %d\n", station[h].id, st[h].used);
-      }
       if(processing[j]->fabproc.timeleft == 0 && strcmp(processing[j]->processstate,"Processing") == 0) {
-        strcpy(processing[j]->processstate, "waiting");
+        //if the conditions are met it puts the car in waiting
+        strcpy(processing[j]->processstate, "Waiting");
+        //the station is no longer in use
         st[processing[j]->std-1].used = -1;
+        //the state of the station is the following:
+        //operation in progress: NONE
+        //Car in progress: NONE
+        //Name of the operation: NOT DEFINED
+        //State of the station: IDLE
         st[processing[j]->std-1].operations = '-';
         strcpy(st[processing[j]->std-1].carname,"   -");
         strcpy(st[processing[j]->std-1].opName,"   -");
         strcpy(st[processing[j]->std-1].state,"   Idle");
+        //initializing variable "done"
         done= 0;
+        //removes the letter that marked the previous operation
         for(int k= 0; k < 3 && done == 0; k++) {
           if(processing[j]->fabproc.opso[k] != '-') {
             processing[j]->fabproc.opso[k] = '-';
             done= 1;
           }
         }
+        //the station the car is marked to is now: NOT DEFINED
         processing[j]->std = 0;
       }
       else {
+        //if the time left to finish the operation is 0 and it still has one or more operations to do
         if(processing[j]->fabproc.timeleft == 0 && strcmp(processing[j]->fabproc.opso, "---") != 0) {
           for(k= 0; processing[j]->fabproc.opso[k] == '-' && k < 3; k++) {}
-          for(int h= 0; h < 5; h++) {
-            for(int x= 0; x < 3; x++) {
-              if(processing[j]->fabproc.opso[k] == station[h].ops[x] && st[h].used == -1 && station[h].temp_ops[x]<lesstime){
-                lesstime = station[h].temp_ops[x];
-                stationless = h;
-              } 
+          //initializing aux variable
+          aux= 1000;
+          aux2= 0; 
+          //choosing whats the smallest cost but only if the station is free
+          for(int h= 0; h < 5 ; h++) {
+            for(int x= 0; x < 3 ; x++) {
+              if(processing[j]->fabproc.opso[k] == station[h].ops[x] && st[h].used == -1 && station[h].cost < aux) {
+                aux= station[h].cost;
+              }
             }
           }
-           if(st[stationless].used == -1) {
+          for(int h= 0; h < 5 ; h++) {
+            for(int x= 0; x < 3 ; x++) {
+              if(processing[j]->fabproc.opso[k] == station[h].ops[x] && st[h].used == -1 && station[h].cost == aux) {
+                //the car is in progress
                 strcpy(processing[j]->processstate, "Processing");
-                processing[j]->fabproc.timeleft = station[stationless].temp_ops[x];
-                processing[j]->std = station[stationless].id;
-                st[staionless].used = 1;
-                strcpy(st[j].carname,processing[j]->name);
-                strcpy(st[j].state,"Processing");
-                st[stationless].operations = processing[j]->fabproc.opso[k];
+                //Now the time left is the time that the station needs to complete the operation
+                processing[j]->fabproc.timeleft = station[h].temp_ops[x];
+                //Now the station identifier is the station id
+                processing[j]->std = station[h].id;
+                //the station is used
+                st[h].used = 1;
+                //modifing the state (st[h].state), name of the car (st[h].carname) and operation (st[h].operations) in the station status
+                strcpy(st[h].carname,processing[j]->name);
+                strcpy(st[h].state,"Processing");
+                st[h].operations = processing[j]->fabproc.opso[k];
+                //giving a name for the operation fron the caracter of the operation in progress
                 switch(st[h].operations) {
-                case 'A': strcpy(st[stationless].opName,"Soldering"); break;
-                case 'B': strcpy(st[stationless].opName,"Cuting"); break;
-                case 'C': strcpy(st[stationless].opName,"Painting"); break;
-                case 'D': strcpy(st[stationless].opName,"Assembling"); break;
-                case 'E': strcpy(st[stationless].opName,"Finishing"); break;
-                default: strcpy(st[stationless].opName,"-"); break;
+                case 'A': strcpy(st[h].opName,"Soldering"); break;
+                case 'B': strcpy(st[h].opName,"Cuting"); break;
+                case 'C': strcpy(st[h].opName,"Painting"); break;
+                case 'D': strcpy(st[h].opName,"Assembling"); break;
+                case 'E': strcpy(st[h].opName,"Finishing"); break;
+                default: strcpy(st[h].opName,"-"); break;
+                }
+                break;
+              }
+            }
+          }
         }
       }
     }
   }while(timeadded != 0);
-  for(int j= 0; j < *queue; j++) {
-    if(strcmp(processing[j]->fabproc.opso, "---") == 0) {
-      strcpy(finished[*finish]->name, processing[j]->name);
-      finished[*finish+1]= malloc(sizeof(car));
-      *finish += 1;
-    }
-  }
-  for(int h= 0; h < *queue; h++) {
-    for(int i= 0; i < *queue; i++) {
-      if(strcmp(processing[i]->fabproc.opso, "---") == 0) {
+  //everything that is finished but still waiting will be transfered to a finished state
+  //if the count == *queue it means that the selection already covered every possible car in the condition below
+  for(int h= 0; count != *queue; h++) {
+    count= 0;
+    for(int j= 0; j < *queue; j++) {
+      if(strcmp(processing[j]->fabproc.opso, "---") == 0 && strcmp(processing[j]->processstate, "Waiting") == 0) {
+        strcpy(finished[*finish]->name, processing[j]->name);
+        finished[*finish+1]= malloc(sizeof(car));
+        // + 1 to the finish count
+        *finish += 1;
+        // - 1 to the queue count, because theres now - one car in progress or waiting
         *queue -= 1;
-        for(int k= i; k < *queue; k++) {
-          printf("%s %s\n", processing[k]->name, processing[k]->processstate);
-          printf("%s %s\n", processing[k+1]->name, processing[k+1]->processstate);
+        //shifts every member next to the one that just left, one place to the left 
+        for(int k= j; k < *queue; k++) {
           processing[k] = processing[k+1];
         }
+      }
+      else {
+        count++;
       }
     }
   }
@@ -699,6 +770,8 @@ void stations_process(stations_use st[5]) {
 void main(){
   int currenttime=0;
   int queuecount= 0;
+  int totalitems=0;
+  int aux=0;
   int *queue= &queuecount;
   int fin=0;
   int fincount= 0;
@@ -723,7 +796,6 @@ void main(){
   printf("%d\n",*queue);
   printf("%d\n",*finish);
   do {
-    system("clear");
     menu_display();
     //Allow the option to be only one character long
     scanf(" %s", user);
@@ -732,7 +804,7 @@ void main(){
     switch(*user) {
       case '1': custo_total= 0;
                 for(int i= 0; i < *countstock; i++)
-                custo_total += ((*stock_ptr[i]).cost)*((*stock_ptr[i]).amount);
+                   custo_total += ((*stock_ptr[i]).cost)*((*stock_ptr[i]).amount);
                 view_stock(stock_ptr, custo_total,countstock);
                 system("clear");
                 break;
@@ -745,7 +817,7 @@ void main(){
       case '4': factory_state_interface(station,st,processing,queue,finished,finish);
                 system("clear");
                 break;
-      case '5': stats_interface();
+      case '5': stats_interface(finished,finish,station);
                 system("clear");
                 break;
       case '6': time_skip(currenttime, processing, finish, queue, finished,stock_ptr, countstock,st,station);
@@ -753,5 +825,42 @@ void main(){
       default: continue;
     } 
   } while(strchr(user,'E')== 0 && strchr(user,'e')==0);
-  printf("Exiting...\n");
+  printf("%d %s %.2f", stock_ptr[0]->id, stock_ptr[0]->name, stock_ptr[0]->cost);
+  FILE *stck;
+  stck = fopen("files/stock.txt", "w+");
+    for(int i=0;i<*countstock;i++){
+      totalitems += stock_ptr[i]->amount;
+    }
+    for(int i=0;i<*countstock;i++){
+      for(int j=0;j<stock_ptr[i]->amount;j++){
+        printf("%d %s %.2f", stock_ptr[i]->id, stock_ptr[i]->name, stock_ptr[i]->cost);
+        fprintf(stck,"%d %s %.2f", stock_ptr[i]->id, stock_ptr[i]->name, stock_ptr[i]->cost);
+        if(aux != (totalitems-1)){
+          printf("\n");
+          fprintf(stck,"\n");
+        }
+        aux +=1;
+      }
+    }
+    fclose(stck);
+  FILE *prc;
+  prc = fopen("files/processing.txt", "w+");
+    for(int i=0;i<*finish;i++){
+      printf("%s Finished - 0 ---\n", finished[i]->name);
+      fprintf(prc,"%s Finished - 0 ---\n", finished[i]->name);
+    }
+    for(int i=0;i<*queue;i++){
+      printf("%s %s %d %d %s", processing[i]->name, processing[i]->processstate, processing[i]->std, processing[i]->fabproc.timeleft, processing[i]->fabproc.opso);
+      fprintf(prc,"%s %s %d %d %s", processing[i]->name, processing[i]->processstate, processing[i]->std, processing[i]->fabproc.timeleft, processing[i]->fabproc.opso);
+      if(i != (*queue - 1)){
+        printf("\n");
+        fprintf(prc,"\n");
+      }
+    }
+    fclose(prc);
+  FILE *sta;
+  sta = fopen("files/stations.dat","wb+");
+    fwrite(station,sizeof(stations),5,sta);
+    fclose(sta);
+  printf("\nExiting...\n");
 }
