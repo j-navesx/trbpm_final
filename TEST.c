@@ -538,6 +538,7 @@ void stats_interface() {
     }
   }while(user != 'B' && user != 'b');
 }
+
 void time_skip(int currenttime,car *processing[sizeof(car)],int queue,car *finished[sizeof(car)],int fin){
   int timeadded;
   printf("Insira o tempo que pretende que passe (em minutos): ");
