@@ -545,44 +545,89 @@ void stats_interface() {
     }
   }while(user != 'B' && user != 'b');
 }
-void time_skip(int currenttime,car *processing[sizeof(car)],int *finish, int *queue,car *finished[sizeof(car)], stock *stock_ptr[sizeof(stock)], int *countstock){
+void time_skip(int currenttime,car *processing[sizeof(car)],int *finish, int *queue,car *finished[sizeof(car)], stock *stock_ptr[sizeof(stock)], int *countstock, stations_use st[5], stations station[5]){
   FILE *pr;
   FILE *stck;
   FILE *std;
   int timeadded;
+  int aux= 1000;
+  int k;
+  int done;
   printf("%s\n", finished[0]->name);
   printf("Insira o tempo que pretende que passe (em minutos): ");
   scanf("%d", &timeadded);
-  for(int t=0; t<timeadded; t++){
-    currenttime += 1;
-    for(int i=0; i< *queue; i++){
-      if((processing[i]->std != 0) && (processing[i]->std != -1)){
+  do {
+    timeadded -= 1;
+    for(int i= 0; i < *queue; i++) {
+      if(processing[i]->fabproc.timeleft != 0) {
         processing[i]->fabproc.timeleft -= 1;
-        if(strcmp(processing[i]->fabproc.opso, "---") == 0){
-          strcpy(finished[*finish]->name , processing[i]->name);
-          finished[*finish+1] = malloc(sizeof(car));
-          *finish += 1;
-          strcpy(processing[i]->name , "-");
-          pr = fopen("file/processing.txt","w+");
-          if(pr == NULL){
-            for(int j=0; j<*finish; j++){
-              fprintf(pr,"%s Finished - 0 ---\n",finished[j]->name);
-            }
-            for(int j=0; j< *queue; j++){
-              if((processing[j]->std != 0) && (strcmp(processing[j]->name , "-")!=0)){
-                fprintf(pr,"%s Processing %d %d %s",processing[j]->name, processing[j]->std, processing[j]->fabproc.timeleft, processing[j]->fabproc.opso);
-              }
-              if((processing[j]->std == 0)&&(strcmp(processing[j]->name , "-")!=0)){
-                fprintf(pr,"%s Waiting - 0 %s",processing[j]->name, processing[j]->fabproc.opso);
-              }
-              if(j != *queue-1){
-                fprintf(pr,"\n");
-              }
-            }
-            fclose(pr);
+        station[processing[i]->std-1].temp_final += 1;
+      }
+    }
+    for(int j= 0; j < *queue; j++) {
+      for(int h= 0; h < 5; h++) {
+        printf("%d %d\n", station[h].id, st[h].used);
+      }
+      if(processing[j]->fabproc.timeleft == 0 && strcmp(processing[j]->processstate,"Processing") == 0) {
+        strcpy(processing[j]->processstate, "waiting");
+        st[processing[j]->std-1].used = -1;
+        st[processing[j]->std-1].operations = '-';
+        strcpy(st[processing[j]->std-1].carname,"   -");
+        strcpy(st[processing[j]->std-1].opName,"   -");
+        strcpy(st[processing[j]->std-1].state,"   Idle");
+        done= 0;
+        for(int k= 0; k < 3 && done == 0; k++) {
+          if(processing[j]->fabproc.opso[k] != '-') {
+            processing[j]->fabproc.opso[k] = '-';
+            done= 1;
           }
         }
-      
+        processing[j]->std = 0;
+      }
+      else {
+        if(processing[j]->fabproc.timeleft == 0 && strcmp(processing[j]->fabproc.opso, "---") != 0) {
+          for(k= 0; processing[j]->fabproc.opso[k] == '-' && k < 3; k++) {}
+          for(int h= 0; h < 5; h++) {
+            for(int x= 0; x < 3; x++) {
+              if(processing[j]->fabproc.opso[k] == station[h].ops[x] && st[h].used == -1) {
+                strcpy(processing[j]->processstate, "Processing");
+                processing[j]->fabproc.timeleft = station[h].temp_ops[x];
+                processing[j]->std = station[h].id;
+                st[h].used = 1;
+                strcpy(st[j].carname,processing[j]->name);
+                strcpy(st[j].state,"Processing");
+                st[h].operations = processing[j]->fabproc.opso[k];
+                switch(st[h].operations) {
+                case 'A': strcpy(st[h].opName,"Soldering"); break;
+                case 'B': strcpy(st[h].opName,"Cuting"); break;
+                case 'C': strcpy(st[h].opName,"Painting"); break;
+                case 'D': strcpy(st[h].opName,"Assembling"); break;
+                case 'E': strcpy(st[h].opName,"Finishing"); break;
+                default: strcpy(st[h].opName,"-"); break;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }while(timeadded != 0);
+  for(int j= 0; j < *queue; j++) {
+    if(strcmp(processing[j]->fabproc.opso, "---") == 0) {
+      strcpy(finished[*finish]->name, processing[j]->name);
+      finished[*finish+1]= malloc(sizeof(car));
+      *finish += 1;
+    }
+  }
+  for(int h= 0; h < *queue; h++) {
+    for(int i= 0; i < *queue; i++) {
+      if(strcmp(processing[i]->fabproc.opso, "---") == 0) {
+        *queue -= 1;
+        for(int k= i; k < *queue; k++) {
+          printf("%s %s\n", processing[k]->name, processing[k]->processstate);
+          printf("%s %s\n", processing[k+1]->name, processing[k+1]->processstate);
+          processing[k] = processing[k+1];
+        }
       }
     }
   }
@@ -673,7 +718,7 @@ void main(){
   printf("%d\n",*queue);
   printf("%d\n",*finish);
   do {
-    system("clear");
+    //system("clear");
     menu_display();
     //Allow the option to be only one character long
     scanf(" %s", user);
@@ -698,7 +743,7 @@ void main(){
       case '5': stats_interface();
                 system("clear");
                 break;
-      case '6': time_skip(currenttime, processing, finish, queue, finished,stock_ptr, countstock);
+      case '6': time_skip(currenttime, processing, finish, queue, finished,stock_ptr, countstock,st,station);
                 break;
       default: continue;
     } 
