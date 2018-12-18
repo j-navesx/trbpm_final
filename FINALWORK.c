@@ -202,7 +202,6 @@ void view_stock(stock *stock_ptr[sizeof(stock)],float ct, int *countstock) {
   system("clear");
   char user;
   int i;
-  printf("countstock %d\n\n",*countstock);
   do {
     printf("        ***STOCK***         \n\n");
     printf("ID   Type       Price    Qt.\n\n");
@@ -246,7 +245,7 @@ void refill_stock(stock *stock_ptr[sizeof(stock)], int *countstock) {
 }
 
 //Car production menu
-void carP(car *processing[sizeof(car)], char *stationsv,int *countstock, stock *stock_ptr[sizeof(stock)], int *queue){
+int carP(car *processing[sizeof(car)], char *stationsv,int *countstock, stock *stock_ptr[sizeof(stock)], int *queue){
   system("clear");
   //Auxiliary variables
   int choice;
@@ -262,15 +261,19 @@ void carP(car *processing[sizeof(car)], char *stationsv,int *countstock, stock *
   cp = fopen("files/carmodel.txt","r");
   if(cp!=NULL){
     do{
-      fscanf(cp,"%d %s %*d %*d %*d %*d %*d %*d %*d %*d %*s",&id,name);
+      fscanf(cp,"%d %s ",&id,name);
+      for (int j=0;j<*countstock;j++){
+        fscanf(cp,"%*d ");
+      }
+      fscanf(cp,"%*d %*d %*s");
       printf("%d %s\n", id, name);
     }while((aux=fgetc(cp))!=EOF);
   }
   fclose(cp);
   printf("Sua opção: ");
-  scanf("%d", &choice);
   getchar();
-  if(choice == 'b'){return;}
+  choice= getchar();
+  if(choice == 'b'){return 0;}
   //Opens car carmodel.txt to store the car we asked him in a temporary car for further adding
   cp = fopen("files/carmodel.txt","r");
   if(cp!=NULL){
@@ -324,6 +327,7 @@ void carP(car *processing[sizeof(car)], char *stationsv,int *countstock, stock *
   }
   processing[*queue+1] = malloc(sizeof(car));
   *queue += 1;
+  return 0;
 } 
 
 //Reads the stations.dat files and stores in the respective structure
@@ -453,29 +457,35 @@ void Search_by_type(car *processing[], int *queue, car *finished[sizeof(car)], i
 }
 
 //Counts the cars that were finished
-void finished_by_type(int *finish, car *finished[]) {
+void finished_by_type(int *finish, car *finished[], int *countstock) {
   system("clear");
   char user;
-  float countFord= 0, countR= 0, countH= 0, countM= 0, countFerr= 0;
-
-  for(int i= 0; i < *finish; i++) {
-    if(strcmp(finished[i]->name,"Ford")== 0) { countFord++;}
-    if(strcmp(finished[i]->name,"Renault")== 0) { countR++;}
-    if(strcmp(finished[i]->name,"Honda")== 0) { countH++;}
-    if(strcmp(finished[i]->name,"Mercedes")== 0) { countM++;}
-    if(strcmp(finished[i]->name,"Ferrari")== 0) { countFerr++;}
-  }
-
+  char name[20];
+  int id;
+  float countcar;
+  char aux;
+  FILE *fp;
+  fp= fopen("files/carmodel.txt","r");
   do {
     printf("\n\nNum   Marca      Qtd.    Percentage\n\n");
-    printf(" 1  - Ford \t %.0f \t %.2f%%\n", countFord, countFord/(*finish)*100);
-    printf(" 2  - Renault \t %.0f\t %.2f%%\n", countR, countR/(*finish)*100);
-    printf(" 3  - Honda \t %.0f\t %.2f%%\n", countH, countH/(*finish)*100);
-    printf(" 4  - Mercedes \t %.0f\t %.2f%%\n", countM, countM/(*finish)*100);
-    printf(" 5  - Ferrari \t %.0f\t %.2f%%\n", countFerr, countFerr/(*finish)*100);
+    do {
+      countcar= 0;
+      fscanf(fp,"%d %s ",&id,name);
+      for (int j=0;j<*countstock;j++){
+        fscanf(fp,"%*d ");
+      }
+      fscanf(fp,"%*d %*d %*s");
+      for(int i= 0; i < *finish; i++) {
+        if(strcmp(finished[i]->name,name)== 0) { 
+          countcar++;
+        }
+      }
+      printf(" %d  - %s \t %.0f \t %.2f%%\n", id, name, countcar, countcar/(*finish)*100);
+    }while((aux=fgetc(fp))!=EOF);
     getchar();
     scanf("%c",&user);
   }while( user != '\n');
+  fclose(fp);
 }
 
 //Counts the number of cars Waiting or Processing
@@ -617,7 +627,7 @@ void factory_state_interface(stations station[5], stations_use st[5], car *proce
 }
 
 //Selection interface for Stats
-void stats_interface(car *processing[], car *finished[sizeof(car)], int *finish, int *queue, stations station[5]) {
+void stats_interface(car *processing[], car *finished[sizeof(car)], int *finish, int *queue, stations station[5], int *countstock) {
   system("clear");
   char user;
     
@@ -626,7 +636,7 @@ void stats_interface(car *processing[], car *finished[sizeof(car)], int *finish,
         scanf(" %c", &user);
   //dá a hipotese do user ir utilizcar *processing[sizeof(car)],int queuecar *processing[sizeof(car)],int queuear cada opção do menu que diz stats (opção 5)
       switch(user) {
-        case '1': finished_by_type(finish,finished);
+        case '1': finished_by_type(finish,finished,countstock);
                   break;
         case '2': Products_state(processing,finish,queue);
                   break;
@@ -648,7 +658,6 @@ void time_skip(int currenttime,car *processing[sizeof(car)],int *finish, int *qu
   int done;
   int count= 0;
   //Asks the user how time he wants the machine do skip
-  printf("%s\n", finished[0]->name);
   printf("Insira o tempo que pretende que passe (em minutos): ");
   scanf(" %d", &timeadded);
   do {
@@ -870,7 +879,7 @@ void main(){
       case '4': factory_state_interface(station,st,processing,queue,finished,finish);
                 system("clear");
                 break;
-      case '5': stats_interface(processing,finished,finish,queue,station);
+      case '5': stats_interface(processing,finished,finish,queue,station,countstock);
                 system("clear");
                 break;
       case '6': time_skip(currenttime, processing, finish, queue, finished,stock_ptr, countstock,st,station);
@@ -878,7 +887,6 @@ void main(){
       default: continue;
     } 
   } while(strchr(user,'E')== 0 && strchr(user,'e')==0);
-  printf("Exiting...\n");
   //Writes changes in stock.txt
   FILE *stck;
   stck = fopen("files/stock.txt", "w+");
